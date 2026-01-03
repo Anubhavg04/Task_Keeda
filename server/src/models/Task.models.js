@@ -19,6 +19,10 @@ const taskSchema = new mongoose.Schema(
         dueDate: {
             type: Date,
         },
+        isDeleted: {
+            type: Boolean,
+            default: false,
+        },
         user: {
             type: mongoose.Schema.Types.ObjectId,
             ref: "User",
