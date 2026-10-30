@@ -5,12 +5,20 @@ import jwt from 'jsonwebtoken';
 //  /api/auth/register
 export const register = async(req,res)=>{
     try {
-        const {fullname, email, password} = req.body;
+        const fullname = typeof req.body.fullname === 'string' ? req.body.fullname.trim() : '';
+        const email = typeof req.body.email === 'string' ? req.body.email.trim().toLowerCase() : '';
+        const { password } = req.body;
 
         if(!fullname || !email || !password){
             return res.status(400).json({
                 message: " All fields are required"
             });
+        }
+        if (fullname.length > 100 || email.length > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+            return res.status(400).json({ message: 'Enter a valid name and email address' });
+        }
+        if (typeof password !== 'string' || password.length < 8 || password.length > 128) {
+            return res.status(400).json({ message: 'Password must be between 8 and 128 characters' });
         }
 
         const existAlready = await User.findOne({email});
@@ -27,8 +35,6 @@ export const register = async(req,res)=>{
             email,
             password : hashedPassword,
         });
-        console.log(user);
-
         res.status(201).json({
             message : "User registered successfully",
             user:{
@@ -39,6 +45,10 @@ export const register = async(req,res)=>{
         });
 
     } catch (error) {
+        if (error.code === 11000) {
+            return res.status(409).json({ message: 'User already exists' });
+        }
+        console.error('Registration failed:', error);
         res.status(500).json({
             message:"Server error"
         })
@@ -48,8 +58,9 @@ export const register = async(req,res)=>{
 // /api/auth/login
 export const login = async(req,res)=>{
     try {
-        const{ email , password } = req.body;
-        if(!email || !password){
+        const email = typeof req.body.email === 'string' ? req.body.email.trim().toLowerCase() : '';
+        const { password } = req.body;
+        if(!email || typeof password !== 'string' || password.length > 128){
             return res.status(400).json({
                 message: "All fields are required"
             });
@@ -77,12 +88,13 @@ export const login = async(req,res)=>{
 
         res.cookie("token", token, {
             httpOnly :  true,
-            secure   :  false,
-            sameSite :  'lax'
+            secure   :  process.env.NODE_ENV === 'production',
+            sameSite :  'lax',
+            maxAge   : 7 * 24 * 60 * 60 * 1000,
         });
 
         res.json({
-            message: "Login succesfful",
+            message : "Login successful",
             user:{ 
                 id: user._id,
                 fullname: user.fullname,
@@ -91,8 +103,18 @@ export const login = async(req,res)=>{
         });
 
     } catch (error) {
+        console.error('Login failed:', error);
         res.status(500).json({
             message: "Server error"
         });
     }
+};
+
+export const logout = (req, res) => {
+    res.clearCookie('token', {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+    });
+    res.json({ message: 'Logged out successfully' });
 };
