@@ -1,9 +1,10 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import { LuCircleAlert, LuCheck, LuGitBranch, LuListChecks, LuPlus, LuX } from 'react-icons/lu';
+import { LuCircleAlert, LuCheck, LuGitBranch, LuListChecks, LuMessageCircle, LuPlus, LuX } from 'react-icons/lu';
 import { useTasks } from '../hooks/useTasks.js';
 import { projectAPI } from '../services/api.js';
+import DiscussionThread from './DiscussionThread.jsx';
 import TaskForm from './TaskForm.jsx';
 import { EmptyState, ErrorState, LoadingState, PageHeading, buttonPrimary, inputClass } from './WorkspaceUI.jsx';
 import { formatDateOnly } from '../utils/dates.js';
@@ -33,6 +34,7 @@ const TaskList = () => {
     order: 'desc',
   });
   const [editingTask, setEditingTask] = useState(null);
+  const [discussionTaskId, setDiscussionTaskId] = useState('');
   const [createFormOpen, setCreateFormOpen] = useState(false);
   const [selectedTaskIds, setSelectedTaskIds] = useState([]);
   const [bulkStatus, setBulkStatus] = useState('');
@@ -42,6 +44,10 @@ const TaskList = () => {
   const search = searchParams.get('search') || '';
   const projectId = searchParams.get('projectId') || '';
   const showCreateForm = createFormOpen || searchParams.get('new') === '1';
+  const requestedDiscussionTaskId = searchParams.get('discussionTaskId');
+  const activeDiscussionTaskId = tasks.some((task) => task._id === requestedDiscussionTaskId)
+    ? requestedDiscussionTaskId
+    : discussionTaskId;
   const selectedIdsOnPage = tasks.filter((task) => selectedTaskIds.includes(task._id)).map((task) => task._id);
   const allTasksOnPageSelected = tasks.length > 0 && selectedIdsOnPage.length === tasks.length;
 
@@ -87,6 +93,16 @@ const TaskList = () => {
   };
 
   const refreshTasks = () => fetchTasks({ ...filters, search, projectId, page });
+
+  const toggleDiscussion = (taskId) => {
+    const isOpen = activeDiscussionTaskId === taskId;
+    if (requestedDiscussionTaskId === taskId) {
+      const next = new URLSearchParams(searchParams);
+      next.delete('discussionTaskId');
+      setSearchParams(next, { replace: true });
+    }
+    setDiscussionTaskId(isOpen ? '' : taskId);
+  };
 
   const handleDelete = async (task) => {
     if (!window.confirm(`Delete "${task.title}"? This cannot be undone. Any dependency links pointing to it will also be removed.`)) return;
@@ -344,9 +360,34 @@ const TaskList = () => {
                     </div>
                   </div>
                   <div className="flex shrink-0 items-center gap-1 sm:ml-3">
-                    <button type="button" onClick={() => setEditingTask(task)} className="rounded-lg px-3 py-2 text-xs font-semibold text-slate-500 transition hover:bg-slate-100 hover:text-slate-900">Edit</button>
+                    {task.project && (
+                      <button
+                        type="button"
+                        onClick={() => toggleDiscussion(task._id)}
+                        aria-expanded={activeDiscussionTaskId === task._id}
+                        className="inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-semibold text-slate-500 transition hover:bg-orange-50 hover:text-orange-800"
+                      >
+                        <LuMessageCircle aria-hidden="true" className="h-4 w-4" />
+                        Discuss
+                      </button>
+                    )}
+                    <button type="button" onClick={() => { setDiscussionTaskId(''); setEditingTask(task); }} className="rounded-lg px-3 py-2 text-xs font-semibold text-slate-500 transition hover:bg-slate-100 hover:text-slate-900">Edit</button>
                     <button type="button" onClick={() => handleDelete(task)} className="rounded-lg px-3 py-2 text-xs font-semibold text-slate-400 transition hover:bg-rose-50 hover:text-rose-600">Delete</button>
                   </div>
+                </div>
+              )}
+              {activeDiscussionTaskId === task._id && task.project && (
+                <div className="mt-4 border-t border-slate-100 pt-4">
+                  <DiscussionThread
+                    projectId={task.project._id}
+                    taskId={task._id}
+                    title="Task discussion"
+                    projectOwnerId={projects.find((project) => project._id === task.project._id)?.owner?._id}
+                    members={[
+                      projects.find((project) => project._id === task.project._id)?.owner,
+                      ...(projects.find((project) => project._id === task.project._id)?.members || []),
+                    ].filter(Boolean)}
+                  />
                 </div>
               )}
             </article>

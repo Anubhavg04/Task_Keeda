@@ -17,6 +17,7 @@ import TaskList from './components/TaskList.jsx';
 import DeliveryControlTowerPage from './pages/DeliveryControlTowerPage.jsx';
 import ImpactSimulatorPage from './pages/ImpactSimulatorPage.jsx';
 import NotificationSettingsPage from './pages/NotificationSettingsPage.jsx';
+import ProjectChatPage from './pages/ProjectChatPage.jsx';
 
 function App() {
   const protectedPage = (page) => <ProtectedRoute demo={<DemoWorkspace />}>{page}</ProtectedRoute>;
@@ -29,6 +30,7 @@ function App() {
             <Route path="/" element={protectedPage(<HomePage />)} />
             <Route path="/tasks" element={protectedPage(<TaskList />)} />
             <Route path="/projects" element={protectedPage(<ProjectsPage />)} />
+            <Route path="/projects/:projectId/chat" element={protectedPage(<ProjectChatPage />)} />
             <Route path="/calendar" element={protectedPage(<CalendarPage />)} />
             <Route path="/notes" element={protectedPage(<NotesPage />)} />
             <Route path="/reports" element={protectedPage(<ReportsPage />)} />

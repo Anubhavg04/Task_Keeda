@@ -7,7 +7,8 @@ New visitors can explore a sample workspace before creating an account.
 ## What you can do
 
 - **Plan tasks:** organize work by status, priority, due date, and estimated effort. Search and filter tasks, or update many tasks at once.
-- **Work with a team:** create shared workspaces, invite registered TaskFlow users, assign tasks, and keep team notes together.
+- **Work with a team:** create shared workspaces, invite registered TaskFlow users, assign tasks, discuss individual tasks, chat in the workspace, and keep team notes together.
+- **Stay in the loop:** get in-app alerts for team discussion messages, mention teammates by name or picker, and open the related conversation from the notification bell.
 - **Keep personal work private:** personal tasks stay in your personal workspace. Team members can access a shared workspace, but cannot see your personal workspace.
 - **Plan dependencies:** link prerequisite tasks, prevent completion while prerequisites are unfinished, and see how blocked work affects a plan.
 - **Track delivery:** review project health, team workload, and delivery forecasts in the Control Tower.

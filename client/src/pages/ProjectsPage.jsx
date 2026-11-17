@@ -4,7 +4,7 @@ import { useSearchParams } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { LuPlus } from 'react-icons/lu';
 import { useAuth } from '../context/useAuth.js';
-import { projectAPI } from '../services/api.js';
+import { discussionAPI, projectAPI } from '../services/api.js';
 import { EmptyState, ErrorState, LoadingState, PageHeading, buttonPrimary, inputClass } from '../components/WorkspaceUI.jsx';
 
 const colors = {
@@ -19,6 +19,8 @@ const ProjectsPage = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const { user } = useAuth();
   const [projects, setProjects] = useState([]);
+  const [discussionSummaries, setDiscussionSummaries] = useState({});
+  const [discussionSummaryError, setDiscussionSummaryError] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [showCreate, setShowCreate] = useState(false);
@@ -31,8 +33,15 @@ const ProjectsPage = () => {
     setLoading(true);
     setError('');
     try {
-      const response = await projectAPI.getProjects();
-      setProjects(response.data);
+      const [projectsResponse, summariesResponse] = await Promise.all([
+        projectAPI.getProjects(),
+        discussionAPI.getSummaries(),
+      ]);
+      setProjects(projectsResponse.data);
+      setDiscussionSummaries(Object.fromEntries(
+        summariesResponse.data.map((summary) => [String(summary.projectId), summary])
+      ));
+      setDiscussionSummaryError('');
     } catch (requestError) {
       setError(requestError.response?.data?.message || 'Could not load projects.');
     } finally {
@@ -40,9 +49,32 @@ const ProjectsPage = () => {
     }
   }, []);
 
+  const refreshDiscussionSummaries = useCallback(async () => {
+    try {
+      const response = await discussionAPI.getSummaries();
+      setDiscussionSummaries(Object.fromEntries(
+        response.data.map((summary) => [String(summary.projectId), summary])
+      ));
+      setDiscussionSummaryError('');
+    } catch (requestError) {
+      setDiscussionSummaryError(requestError.response?.data?.message || 'Chat previews could not be refreshed.');
+    }
+  }, []);
+
   useEffect(() => {
     loadProjects();
   }, [loadProjects]);
+
+  useEffect(() => {
+    const intervalId = window.setInterval(() => {
+      if (document.visibilityState === 'visible') refreshDiscussionSummaries();
+    }, 15000);
+    window.addEventListener('taskflow:discussions-read', refreshDiscussionSummaries);
+    return () => {
+      window.clearInterval(intervalId);
+      window.removeEventListener('taskflow:discussions-read', refreshDiscussionSummaries);
+    };
+  }, [refreshDiscussionSummaries]);
 
   useEffect(() => {
     if (searchParams.get('new') !== '1') return;
@@ -152,6 +184,7 @@ const ProjectsPage = () => {
       )}
 
       {error && <div className="mb-5"><ErrorState message={error} onRetry={loadProjects} /></div>}
+      {discussionSummaryError && <p role="status" className="mb-4 text-xs text-amber-700">{discussionSummaryError}</p>}
       {error ? null : loading ? <LoadingState label="Loading your projects..." /> : projects.length === 0 ? (
         <EmptyState title="Give your team a shared home" description="Create a team workspace to bring people, tasks, and reference notes together. You can invite registered TaskFlow users after creating it." action={<button type="button" onClick={() => setShowCreate(true)} className={buttonPrimary}>Create your first team workspace</button>} />
       ) : (
@@ -160,6 +193,8 @@ const ProjectsPage = () => {
             const theme = colors[project.color] || colors.orange;
             const isOwner = String(project.owner?._id) === String(user?._id || user?.id);
             const team = [project.owner, ...(project.members || [])].filter(Boolean);
+            const discussionSummary = discussionSummaries[String(project._id)];
+            const unreadCount = discussionSummary?.unreadCount || 0;
             return (
               <article key={project._id} className={`overflow-hidden rounded-2xl border border-slate-200/80 border-t-[3px] ${theme.edge} bg-white shadow-sm shadow-slate-200/30`}>
                 <div className="p-5 sm:p-6">
@@ -205,9 +240,18 @@ const ProjectsPage = () => {
                     </form>
                   )}
                   <div className="mt-5 flex gap-2 border-t border-slate-100 pt-4">
-                    <Link to={`/tasks?projectId=${project._id}`} className={`flex-1 rounded-lg px-3 py-2 text-center text-xs font-semibold transition ${theme.button}`}>View tasks</Link>
-                    <Link to={`/notes?projectId=${project._id}`} className="flex-1 rounded-lg bg-slate-50 px-3 py-2 text-center text-xs font-semibold text-slate-600 transition hover:bg-slate-100">Project notes</Link>
+                    <Link to={`/tasks?projectId=${project._id}`} className={`flex-1 rounded-lg px-2 py-2 text-center text-xs font-semibold transition ${theme.button}`}>View tasks</Link>
+                    <Link to={`/projects/${project._id}/chat`} title={discussionSummary?.lastMessage?.content || 'Open team chat'} className="flex flex-1 items-center justify-center gap-1.5 rounded-lg bg-orange-50 px-2 py-2 text-center text-xs font-semibold text-orange-800 transition hover:bg-orange-100">
+                      Team chat
+                      {unreadCount > 0 && <span className="rounded-full bg-orange-700 px-1.5 py-0.5 text-[10px] leading-none text-white">{unreadCount > 99 ? '99+' : unreadCount}</span>}
+                    </Link>
+                    <Link to={`/notes?projectId=${project._id}`} className="flex-1 rounded-lg bg-slate-50 px-2 py-2 text-center text-xs font-semibold text-slate-600 transition hover:bg-slate-100">Project notes</Link>
                   </div>
+                  {discussionSummary?.lastMessage && (
+                    <p className="mt-2 truncate text-xs text-slate-400" title={discussionSummary.lastMessage.content}>
+                      Latest chat: {discussionSummary.lastMessage.content}
+                    </p>
+                  )}
                 </div>
               </article>
             );

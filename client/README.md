@@ -8,6 +8,7 @@ TaskFlow is a shared work hub for teams and individuals. It brings task planning
 - **Tasks:** searchable, filterable, sortable, paginated tasks with due dates, status, priority, effort estimates, project-member assignment, and same-workspace prerequisites.
 - **Bulk task triage:** select up to 100 accessible tasks across pages and update status and/or priority in one validated request.
 - **Team workspaces:** shared projects with owner-managed membership and project-specific tasks. Each project currently acts as a team workspace; there is no separate company/organization entity.
+- **Team discussions:** post text updates in a workspace chat or in a discussion attached to a shared task. Messages show their author and timestamp; older history can be loaded on demand. Only current workspace members can access discussions. Authors can edit or delete their own messages, and workspace owners can delete any message. Open discussions check for new messages every five seconds while the tab is visible. Workspace cards show the latest chat preview and unread-message count. The in-app notification bell alerts members to every new discussion message, supports marking notifications read, and links back to the conversation. Mention teammates by typing `@` and choosing a suggestion, typing a unique full name, or using the teammate picker.
 - **Calendar:** monthly deadline view with inline task status updates.
 - **Notes:** personal notes and notes shared with a project team.
 - **Reports:** live task and project metrics, priority breakdowns, and full-workspace CSV export.
