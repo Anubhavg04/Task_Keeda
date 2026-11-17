@@ -20,6 +20,7 @@ import { useAuth } from '../context/useAuth.js';
 import { projectAPI } from '../services/api.js';
 import TaskFlowLogo from './TaskFlowLogo.jsx';
 import CommandPalette from './CommandPalette.jsx';
+import NotificationBell from './NotificationBell.jsx';
 
 const navigation = [
   { label: 'Overview', path: '/', icon: LuLayoutDashboard },
@@ -281,6 +282,7 @@ const Layout = ({ children }) => {
               </div>
             </form>
             <div className="flex items-center gap-3">
+              <NotificationBell />
               <button
                 type="button"
                 onClick={() => setCommandPaletteOpen(true)}

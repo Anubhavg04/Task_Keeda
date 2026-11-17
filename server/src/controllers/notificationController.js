@@ -1,5 +1,14 @@
+import mongoose from 'mongoose';
+import InAppNotification from '../models/InAppNotification.models.js';
+import Project from '../models/Project.models.js';
 import PushSubscription from '../models/PushSubscription.models.js';
 import { getPushConfiguration } from '../services/pushNotifications.js';
+
+const accessibleProjectFilter = (userId) => ({
+  $or: [{ owner: userId }, { members: userId }],
+});
+
+const getAccessibleProjectIds = async (userId) => Project.find(accessibleProjectFilter(userId)).distinct('_id');
 
 const isAllowedPushEndpoint = (value) => {
   if (typeof value !== 'string' || value.length > 2048) return false;
@@ -28,6 +37,65 @@ export const getNotificationSettings = async (req, res) => {
   } catch (error) {
     console.error('Failed to fetch notification settings:', error);
     res.status(500).json({ message: 'Failed to fetch notification settings' });
+  }
+};
+
+export const getInAppNotifications = async (req, res) => {
+  try {
+    const projectIds = await getAccessibleProjectIds(req.user.id);
+    if (!projectIds.length) return res.json({ notifications: [], unreadCount: 0 });
+
+    const filter = { recipient: req.user.id, project: { $in: projectIds } };
+    const [notifications, unreadCount] = await Promise.all([
+      InAppNotification.find(filter)
+        .populate('actor', 'fullname')
+        .populate('project', 'name')
+        .populate('task', 'title')
+        .sort({ createdAt: -1 })
+        .limit(50)
+        .lean(),
+      InAppNotification.countDocuments({ ...filter, readAt: null }),
+    ]);
+    res.json({ notifications, unreadCount });
+  } catch (error) {
+    console.error('Failed to fetch in-app notifications:', error);
+    res.status(500).json({ message: 'Failed to fetch in-app notifications' });
+  }
+};
+
+export const markInAppNotificationRead = async (req, res) => {
+  if (!mongoose.isValidObjectId(req.params.id)) {
+    return res.status(400).json({ message: 'Invalid notification id' });
+  }
+
+  try {
+    const projectIds = await getAccessibleProjectIds(req.user.id);
+    const notification = await InAppNotification.findOneAndUpdate(
+      { _id: req.params.id, recipient: req.user.id, project: { $in: projectIds } },
+      { $set: { readAt: new Date() } },
+      { new: true }
+    );
+    if (!notification) return res.status(404).json({ message: 'Notification not found' });
+    res.json({ message: 'Notification marked as read' });
+  } catch (error) {
+    console.error('Failed to mark in-app notification as read:', error);
+    res.status(500).json({ message: 'Failed to mark notification as read' });
+  }
+};
+
+export const markAllInAppNotificationsRead = async (req, res) => {
+  try {
+    const projectIds = await getAccessibleProjectIds(req.user.id);
+    if (projectIds.length) {
+      await InAppNotification.updateMany(
+        { recipient: req.user.id, project: { $in: projectIds }, readAt: null },
+        { $set: { readAt: new Date() } }
+      );
+    }
+    res.json({ message: 'All notifications marked as read' });
+  } catch (error) {
+    console.error('Failed to mark all in-app notifications as read:', error);
+    res.status(500).json({ message: 'Failed to mark notifications as read' });
   }
 };
 

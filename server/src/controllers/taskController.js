@@ -1,5 +1,7 @@
 import mongoose from 'mongoose';
 import Project from '../models/Project.models.js';
+import DiscussionMessage from '../models/DiscussionMessage.models.js';
+import InAppNotification from '../models/InAppNotification.models.js';
 import Task from '../models/Task.models.js';
 import User from '../models/User.models.js';
 import { sendPushToUser } from '../services/pushNotifications.js';
@@ -368,6 +370,7 @@ export const updateTask = async (req, res) => {
       return res.status(404).json({ message: 'Task not found' });
     }
     const previousAssigneeId = task.assignee ? String(task.assignee) : null;
+    const previousProjectId = task.project ? String(task.project) : '';
 
     let taskProject = null;
     if (task.project) {
@@ -465,6 +468,12 @@ export const updateTask = async (req, res) => {
     }
 
     await task.save();
+    if (previousProjectId !== (task.project ? String(task.project) : '')) {
+      await Promise.all([
+        DiscussionMessage.deleteMany({ task: task._id }),
+        InAppNotification.deleteMany({ task: task._id }),
+      ]);
+    }
     const nextAssigneeId = task.assignee ? String(task.assignee) : null;
     if (nextAssigneeId && nextAssigneeId !== previousAssigneeId && nextAssigneeId !== String(req.user.id)) {
       sendPushToUser(nextAssigneeId, {
@@ -943,7 +952,11 @@ export const deleteTask = async (req, res) => {
     }
 
     await Task.updateMany({ dependsOn: task._id }, { $pull: { dependsOn: task._id } });
-    await task.deleteOne();
+    await Promise.all([
+      DiscussionMessage.deleteMany({ task: task._id }),
+      InAppNotification.deleteMany({ task: task._id }),
+      task.deleteOne(),
+    ]);
     res.json({ message: 'Task deleted' });
   } catch (error) {
     console.error('Failed to delete task:', error);

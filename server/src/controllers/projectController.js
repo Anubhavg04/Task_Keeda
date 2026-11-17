@@ -1,5 +1,8 @@
 import mongoose from 'mongoose';
 import Project from '../models/Project.models.js';
+import DiscussionMessage from '../models/DiscussionMessage.models.js';
+import DiscussionReadState from '../models/DiscussionReadState.models.js';
+import InAppNotification from '../models/InAppNotification.models.js';
 import Note from '../models/Note.models.js';
 import Task from '../models/Task.models.js';
 import User from '../models/User.models.js';
@@ -114,6 +117,7 @@ export const removeProjectMember = async (req, res) => {
       { project: project._id, assignee: req.params.memberId },
       { $set: { assignee: null } }
     );
+    await InAppNotification.deleteMany({ project: project._id, recipient: req.params.memberId });
     await project.populate('owner', 'fullname email');
     await project.populate('members', 'fullname email');
     res.json(project);
@@ -134,9 +138,18 @@ export const deleteProject = async (req, res) => {
       return res.status(404).json({ message: 'Project not found or you are not the owner' });
     }
 
+    const taskIds = await Task.find({ project: project._id }).distinct('_id');
     await Promise.all([
       Task.updateMany({ project: project._id }, { $set: { project: null, assignee: null, dependsOn: [] } }),
       Note.updateMany({ project: project._id }, { $set: { project: null } }),
+      DiscussionMessage.deleteMany({
+        $or: [
+          { project: project._id },
+          { task: { $in: taskIds } },
+        ],
+      }),
+      DiscussionReadState.deleteMany({ project: project._id }),
+      InAppNotification.deleteMany({ project: project._id }),
     ]);
     await project.deleteOne();
 
