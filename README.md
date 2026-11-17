@@ -71,7 +71,7 @@ Open the Vite URL shown in the terminal, usually `http://localhost:5173`. Vite p
 
 ## Production configuration
 
-The frontend and API are separate applications. Deploy the React frontend to a static hosting service such as Vercel, and deploy the Express API to a Node.js host or configure it for a serverless platform. The repository does not include a Vercel deployment configuration for the Express API.
+The frontend and API are separate applications. A straightforward deployment is Vercel for the React frontend, Render for the Express API, and MongoDB Atlas for the database. On Vercel, set the project root to `client`. On Render, create a Web Service from this repository with the root directory `server`, build command `npm ci`, and start command `npm start`. Create an Atlas database and use its connection string for `MONGO_URI`.
 
 Configure these environment variables for production:
 
@@ -85,7 +85,31 @@ Configure these environment variables for production:
 | `VAPID_PRIVATE_KEY` | API | Private browser-push key. Keep it secret. |
 | `VAPID_SUBJECT` | API | Service contact, for example `mailto:admin@example.com`. |
 
-Use HTTPS for both the frontend and API. If they use different sites, confirm that browser cookie rules allow the authentication cookie to reach the API; same-site hosting or an API proxy is preferable. Use a managed MongoDB service with backups and restrict database network access.
+With Vercel and Render's default domains, configure a Vercel rewrite so browser requests to `/api/*` are proxied to the Render API. After Render gives you the service URL, add `client/vercel.json` with the following content, replacing the example hostname with that URL:
+
+```json
+{
+  "rewrites": [
+    {
+      "source": "/api/:path*",
+      "destination": "https://your-taskflow-api.onrender.com/api/:path*"
+    }
+  ]
+}
+```
+
+Leave `VITE_API_URL` unset on Vercel so the client uses the same-origin `/api` path. Set `CLIENT_ORIGIN` on Render to the exact production Vercel origin, such as `https://your-taskflow.vercel.app`. Set `NODE_ENV=production`, `MONGO_URI`, and a unique `JWT_SECRET` of at least 32 characters on Render; Render supplies `PORT`. Add VAPID variables only if enabling push notifications.
+
+The authentication cookie is `HttpOnly`, `Secure` in production, and `SameSite=Lax`. Do not point the browser directly at the default Render API domain from the default Vercel frontend domain: those are cross-site and the browser will not send this cookie. A Vercel `/api` rewrite keeps browser requests same-origin. Do not change the cookie to `SameSite=None` as a workaround without also designing and implementing CSRF protection.
+
+Before public launch, verify against the deployed URLs over HTTPS:
+
+1. Register an account, log in, reload the page, and confirm the session is restored.
+2. Create and update a task, create a team workspace, and verify authenticated API requests continue to work.
+3. Log out, reload, and confirm the session is cleared.
+4. If push notifications are enabled, subscribe and test a notification on a supported browser.
+
+Use a managed MongoDB service with backups and restrict database network access.
 
 ### Optional: enable phone push notifications
 

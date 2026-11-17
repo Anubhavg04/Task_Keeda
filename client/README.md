@@ -74,7 +74,9 @@ Requirements: Node.js 20.19+ (or 22.12+) and MongoDB.
 | `VITE_API_URL` | Client | API base URL including `/api`; defaults to same-origin `/api`. |
 | `VITE_API_PROXY_TARGET` | Client dev server | Vite proxy target; defaults to `http://localhost:5000`. |
 
-For production, serve the frontend and API over HTTPS, configure the exact frontend origin, use a managed MongoDB deployment with backups, and keep the JWT secret outside source control. When the client and API use different origins, set `VITE_API_URL` to the API's `/api` URL and `CLIENT_ORIGIN` to the frontend origin.
+For a Vercel frontend and Render API on their default domains, proxy `/api/*` through Vercel to the Render service using a `client/vercel.json` rewrite. Keep `VITE_API_URL` unset so the app calls same-origin `/api`; set the API's `CLIENT_ORIGIN` to the exact Vercel frontend origin. The authentication cookie uses `SameSite=Lax`, so direct browser requests across the default Vercel and Render domains will not include it. Do not change the cookie to `SameSite=None` as a workaround without also implementing CSRF protection. For the full deployment steps and rewrite example, see the root [README](../README.md#production-configuration).
+
+Before public launch, test registration, login and session restoration after a page reload, authenticated task and project operations, and logout against the deployed HTTPS URLs. If push notifications are enabled, test a real subscription and notification on a supported browser.
 
 ## API areas
 
