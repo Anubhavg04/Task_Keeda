@@ -76,7 +76,7 @@ const HomePage = () => {
 
           <section className="grid items-start gap-6 xl:grid-cols-[minmax(0,1.55fr)_minmax(290px,0.8fr)]">
             <div className="space-y-6">
-              <article className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm shadow-slate-200/30">
+              <article className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm shadow-slate-200/30 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md hover:shadow-slate-300/40 motion-reduce:transform-none">
                 <div className="flex items-center justify-between border-b border-slate-100 px-5 py-4 sm:px-6">
                   <div>
                     <h2 className="font-semibold text-slate-900">Recently updated</h2>
@@ -87,7 +87,7 @@ const HomePage = () => {
                 {recent.length ? (
                   <ul className="divide-y divide-slate-100">
                     {recent.map((task) => (
-                      <li key={task._id} className="flex items-center gap-3 px-5 py-4 sm:px-6">
+                      <li key={task._id} className="flex items-center gap-3 px-5 py-4 transition-colors duration-150 hover:bg-orange-50/40 sm:px-6">
                         <span className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-sm ${
                           task.status === 'done' ? 'bg-emerald-50 text-emerald-700' : task.status === 'in-progress' ? 'bg-amber-50 text-amber-700' : 'bg-slate-100 text-slate-500'
                         }`}>

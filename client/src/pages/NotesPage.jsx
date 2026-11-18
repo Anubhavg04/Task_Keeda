@@ -130,7 +130,7 @@ const NotesPage = () => {
             <form onSubmit={handleSave} className="mb-5 rounded-2xl border border-orange-200 bg-white p-5 shadow-sm sm:p-6">
               <div className="mb-4 flex items-center justify-between">
                 <h2 className="font-semibold text-slate-900">New note</h2>
-                <button type="button" onClick={() => setEditingId('')} className="rounded px-2 py-1 text-sm text-slate-500 hover:bg-slate-100">Cancel</button>
+                <button type="button" onClick={() => setEditingId('')} className="rounded px-2 py-1 text-sm text-slate-500 transition hover:bg-slate-100 active:scale-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-orange-600">Cancel</button>
               </div>
               <div className="space-y-3">
                 <label className="block text-sm font-medium text-slate-700">Title
@@ -157,7 +157,7 @@ const NotesPage = () => {
           ) : (
             <section aria-label="Notes" className="grid gap-4 md:grid-cols-2 2xl:grid-cols-3">
               {visibleNotes.map((note) => (
-                <article key={note._id} className="flex min-h-56 flex-col rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm shadow-slate-200/30 transition hover:shadow-md">
+                <article key={note._id} className="flex min-h-56 flex-col rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm shadow-slate-200/30 transition-all duration-200 ease-out hover:-translate-y-0.5 hover:border-orange-200 hover:shadow-md hover:shadow-slate-300/40 focus-within:border-orange-200 motion-reduce:transform-none">
                   {editingId === note._id ? (
                     <form onSubmit={handleSave} className="flex flex-1 flex-col gap-3">
                       <label className="text-sm font-medium text-slate-700">Title
@@ -178,12 +178,12 @@ const NotesPage = () => {
                           <h2 className="truncate font-semibold text-slate-900">{note.title}</h2>
                           <span className={`mt-2 inline-flex rounded-full px-2 py-1 text-[10px] font-semibold ${note.project ? 'bg-orange-50 text-orange-700' : 'bg-slate-100 text-slate-600'}`}>{note.project?.name || 'Personal'}</span>
                         </div>
-                        <button type="button" onClick={() => handleDelete(note)} aria-label={`Delete ${note.title}`} className="shrink-0 rounded-lg p-2 text-slate-400 hover:bg-rose-50 hover:text-rose-600"><LuX aria-hidden="true" className="h-4 w-4" /></button>
+                        <button type="button" onClick={() => handleDelete(note)} aria-label={`Delete ${note.title}`} className="shrink-0 rounded-lg p-2 text-slate-400 transition hover:bg-rose-50 hover:text-rose-600 active:scale-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-orange-600"><LuX aria-hidden="true" className="h-4 w-4" /></button>
                       </div>
                       <p className="mt-4 flex-1 whitespace-pre-wrap break-words text-sm leading-6 text-slate-600">{note.content || 'No note content yet.'}</p>
                       <div className="mt-4 flex items-center justify-between border-t border-slate-100 pt-3">
                         <span className="text-xs text-slate-400">Edited {new Date(note.updatedAt).toLocaleDateString()}</span>
-                        <button type="button" onClick={() => startEdit(note)} className="rounded-lg px-3 py-1.5 text-xs font-semibold text-orange-700 hover:bg-orange-50">Edit</button>
+                        <button type="button" onClick={() => startEdit(note)} className="rounded-lg px-3 py-1.5 text-xs font-semibold text-orange-700 transition hover:bg-orange-50 active:scale-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-orange-600">Edit</button>
                       </div>
                     </>
                   )}

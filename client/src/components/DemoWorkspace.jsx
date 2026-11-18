@@ -126,7 +126,7 @@ const DemoSignupPrompt = ({ message, onClose }) => {
 };
 
 const DemoTaskRow = ({ task }) => (
-  <li className={`flex items-center gap-3 border-b border-l-2 border-slate-100 px-4 py-3.5 last:border-0 sm:px-5 ${task.status === 'Done' ? 'border-l-emerald-600' : task.status === 'In progress' ? 'border-l-orange-600' : 'border-l-slate-500'}`}>
+  <li className={`flex items-center gap-3 border-b border-l-2 border-slate-100 px-4 py-3.5 transition-colors duration-150 hover:bg-orange-50/40 focus-within:bg-orange-50/40 last:border-0 sm:px-5 ${task.status === 'Done' ? 'border-l-emerald-600' : task.status === 'In progress' ? 'border-l-orange-600' : 'border-l-slate-500'}`}>
     <span className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${task.status === 'Done' ? 'bg-emerald-50 text-emerald-700' : task.status === 'In progress' ? 'bg-orange-50 text-orange-800' : 'bg-slate-100 text-slate-500'}`}>
       {task.status === 'Done' ? <LuCheck aria-hidden="true" className="h-4 w-4" /> : task.status === 'In progress' ? <LuClock3 aria-hidden="true" className="h-4 w-4" /> : <LuCircleCheck aria-hidden="true" className="h-4 w-4" />}
     </span>
@@ -157,7 +157,7 @@ const ProjectCard = ({ project }) => {
     : 0;
 
   return (
-    <article className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm shadow-slate-200/20">
+    <article className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm shadow-slate-200/20 transition-all duration-200 ease-out hover:-translate-y-0.5 hover:border-orange-200 hover:shadow-md hover:shadow-slate-300/40 motion-reduce:transform-none">
       <div className="flex items-center justify-between">
         <span className={`h-3 w-3 rounded-full ${project.color}`} />
         <span className="rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-semibold text-slate-500">{project.type}</span>
@@ -228,7 +228,7 @@ const FocusSprint = () => {
       : 'Start focus sprint';
 
   return (
-    <article className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm shadow-slate-200/20">
+    <article className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm shadow-slate-200/20 transition-all duration-200 ease-out hover:-translate-y-0.5 hover:border-orange-200 hover:shadow-md hover:shadow-slate-300/40 motion-reduce:transform-none">
       <div className="flex items-start justify-between gap-3">
         <div>
           <div className="flex items-center gap-2 text-sm font-semibold text-slate-900"><LuTarget aria-hidden="true" className="h-4 w-4 text-orange-700" />Focus sprint</div>
@@ -238,7 +238,7 @@ const FocusSprint = () => {
       </div>
       <label className="mt-4 block text-xs font-medium text-slate-500">
         Focus on
-        <select value={selectedTask} onChange={(event) => setSelectedTask(event.target.value)} disabled={running} className="mt-1.5 w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-700 disabled:bg-slate-50">
+        <select value={selectedTask} onChange={(event) => setSelectedTask(event.target.value)} disabled={running} className="mt-1.5 w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-700 transition focus-visible:border-orange-400 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-orange-100 disabled:bg-slate-50">
           {demoTasks.filter((task) => task.status !== 'Done').map((task) => <option key={task.title} value={task.title}>{task.title}</option>)}
         </select>
       </label>
@@ -251,7 +251,7 @@ const FocusSprint = () => {
           <button type="button" onClick={toggleSprint} aria-label={sprintRunning ? 'Pause focus sprint' : sprintActionLabel} className={`inline-flex h-11 w-11 items-center justify-center rounded-xl text-white transition-all duration-300 ease-in-out active:scale-95 md:h-10 md:w-10 ${sprintRunning ? 'bg-orange-800 hover:bg-orange-900' : 'bg-orange-700 hover:bg-orange-800'}`}>
             {sprintRunning ? <LuPause aria-hidden="true" className="h-4 w-4" /> : <LuPlay aria-hidden="true" className="h-4 w-4" />}
           </button>
-          <button type="button" onClick={() => { setSecondsRemaining(duration * 60); setRunning(false); }} aria-label="Reset focus sprint" className="inline-flex h-11 w-11 items-center justify-center rounded-xl border border-slate-200 text-slate-500 transition hover:bg-slate-50 md:h-10 md:w-10">
+          <button type="button" onClick={() => { setSecondsRemaining(duration * 60); setRunning(false); }} aria-label="Reset focus sprint" className="inline-flex h-11 w-11 items-center justify-center rounded-xl border border-slate-200 text-slate-500 transition hover:bg-slate-50 active:scale-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-orange-600 md:h-10 md:w-10">
             <LuRotateCcw aria-hidden="true" className="h-4 w-4" />
           </button>
         </div>
@@ -259,7 +259,7 @@ const FocusSprint = () => {
       <div className="mt-4 h-1.5 overflow-hidden rounded-full bg-slate-100"><div className={`h-full rounded-full transition-[width,background-color] duration-500 ${sprintComplete ? 'bg-emerald-600' : 'bg-orange-600'}`} style={{ width: `${progress}%` }} /></div>
       <div className="mt-3 flex flex-wrap items-center gap-2" aria-label="Focus sprint length">
         {[15, 25, 45].map((option) => (
-          <button type="button" key={option} onClick={() => setSprintDuration(option)} aria-pressed={duration === option} className={`min-h-11 rounded-full px-3 py-1.5 text-xs font-semibold transition-colors duration-300 md:min-h-0 ${duration === option ? 'bg-orange-50 text-orange-800' : 'text-slate-400 hover:bg-slate-50 hover:text-slate-700'}`}>{option} min</button>
+          <button type="button" key={option} onClick={() => setSprintDuration(option)} aria-pressed={duration === option} className={`min-h-11 rounded-full px-3 py-1.5 text-xs font-semibold transition-colors duration-200 active:scale-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-orange-600 md:min-h-0 ${duration === option ? 'bg-orange-50 text-orange-800' : 'text-slate-400 hover:bg-slate-50 hover:text-slate-700'}`}>{option} min</button>
         ))}
         <Link to="/register" className="flex min-h-11 basis-full items-center justify-end text-[11px] font-semibold text-orange-800 hover:text-orange-950 md:ml-auto md:min-h-0 md:basis-auto">Save your progress</Link>
       </div>
@@ -276,7 +276,7 @@ const Dashboard = () => (
       <DemoMetric label="Projects" value="3" caption="Shared spaces for focused work" icon={LuFolderKanban} tone="bg-amber-50 text-amber-700" />
     </div>
     <div className="grid items-start gap-5 xl:grid-cols-[minmax(0,1.4fr)_minmax(280px,0.8fr)]">
-      <article className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm shadow-slate-200/20">
+      <article className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm shadow-slate-200/20 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md hover:shadow-slate-300/40 motion-reduce:transform-none">
         <div className="flex items-center justify-between border-b border-slate-100 px-5 py-4">
           <div><h2 className="font-semibold text-slate-900">Recently updated</h2><p className="mt-1 text-xs text-slate-500">A glimpse of the work in this workspace</p></div>
           <Link to="/tasks" className="inline-flex items-center gap-1 text-sm font-semibold text-orange-800">All tasks <LuArrowRight aria-hidden="true" className="h-4 w-4" /></Link>
@@ -285,7 +285,7 @@ const Dashboard = () => (
       </article>
       <div className="space-y-5">
         <FocusSprint />
-        <article className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm shadow-slate-200/20">
+        <article className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm shadow-slate-200/20 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md hover:shadow-slate-300/40 motion-reduce:transform-none">
           <div className="flex items-center justify-between"><div><h2 className="font-semibold text-slate-900">Teamwork, in one place</h2><p className="mt-1 text-xs text-slate-500">Projects bring the details together</p></div><LuUsersRound aria-hidden="true" className="h-5 w-5 text-orange-700" /></div>
           <div className="mt-4 space-y-3">{demoProjects.slice(0, 2).map((project) => <div key={project.name} className="flex items-center gap-3"><span className={`h-2.5 w-2.5 rounded-full ${project.color}`} /><span className="flex-1 truncate text-sm font-medium text-slate-700">{project.name}</span><span className="text-xs text-slate-400">{project.members.length} people</span></div>)}</div>
         </article>

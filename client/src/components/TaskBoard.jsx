@@ -23,7 +23,7 @@ const initialsFor = (name) => name
   .join('')
   .toUpperCase();
 
-const BoardCard = ({ task, editing, onEdit, onCloseEdit, onSaved }) => {
+const BoardCard = ({ task, editing, statusAnimated, onEdit, onCloseEdit, onSaved }) => {
   const {
     attributes,
     listeners,
@@ -40,7 +40,7 @@ const BoardCard = ({ task, editing, onEdit, onCloseEdit, onSaved }) => {
     <article
       ref={setNodeRef}
       style={style}
-      className={`rounded-xl border border-slate-200/80 bg-white p-3 shadow-sm shadow-slate-200/30 transition-shadow ${isDragging ? 'z-10 opacity-50 shadow-lg' : 'hover:shadow-md'}`}
+      className={`rounded-xl border border-slate-200/80 bg-white p-3 shadow-sm shadow-slate-200/30 transition-all duration-200 ease-out motion-reduce:transform-none ${isDragging ? 'z-10 opacity-50 shadow-lg' : 'hover:-translate-y-0.5 hover:shadow-md hover:shadow-slate-300/40'} ${statusAnimated ? 'task-status-pop' : ''}`}
     >
       {editing ? (
         <TaskForm task={task} onClose={onCloseEdit} onSaved={onSaved} />
@@ -55,7 +55,7 @@ const BoardCard = ({ task, editing, onEdit, onCloseEdit, onSaved }) => {
               {...listeners}
               aria-label={`Move ${task.title} to another status`}
               title="Drag to change status; use arrow keys to move"
-              className="inline-flex h-9 w-9 shrink-0 touch-none items-center justify-center rounded-lg text-slate-400 transition hover:bg-orange-50 hover:text-orange-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-orange-600 active:cursor-grabbing"
+              className="inline-flex h-9 w-9 shrink-0 touch-none items-center justify-center rounded-lg text-slate-400 transition hover:bg-orange-50 hover:text-orange-800 active:scale-95 active:cursor-grabbing focus-visible:outline focus-visible:outline-2 focus-visible:outline-orange-600"
             >
               <LuGripVertical aria-hidden="true" className="h-4 w-4" />
             </button>
@@ -84,7 +84,7 @@ const BoardCard = ({ task, editing, onEdit, onCloseEdit, onSaved }) => {
               onClick={() => onEdit(task)}
               aria-label={`Edit ${task.title}`}
               title="Edit task"
-              className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-slate-400 transition hover:bg-orange-50 hover:text-orange-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-orange-600"
+              className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-slate-400 transition hover:bg-orange-50 hover:text-orange-800 active:scale-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-orange-600"
             >
               <LuPencil aria-hidden="true" className="h-4 w-4" />
             </button>
@@ -95,7 +95,7 @@ const BoardCard = ({ task, editing, onEdit, onCloseEdit, onSaved }) => {
   );
 };
 
-const BoardColumn = ({ status, tasks, editingTask, onEdit, onCloseEdit, onSaved }) => {
+const BoardColumn = ({ status, tasks, editingTask, statusAnimationTaskId, onEdit, onCloseEdit, onSaved }) => {
   const visual = getTaskStatusVisual(status);
   const { isOver, setNodeRef } = useDroppable({ id: status });
 
@@ -115,6 +115,7 @@ const BoardColumn = ({ status, tasks, editingTask, onEdit, onCloseEdit, onSaved 
             key={task._id}
             task={task}
             editing={editingTask?._id === task._id}
+            statusAnimated={statusAnimationTaskId === task._id}
             onEdit={onEdit}
             onCloseEdit={onCloseEdit}
             onSaved={onSaved}
@@ -130,7 +131,7 @@ const BoardColumn = ({ status, tasks, editingTask, onEdit, onCloseEdit, onSaved 
   );
 };
 
-const TaskBoard = ({ tasks, onStatusChange, editingTask, onEdit, onCloseEdit, onSaved }) => {
+const TaskBoard = ({ tasks, onStatusChange, editingTask, statusAnimationTaskId, onEdit, onCloseEdit, onSaved }) => {
   const sensors = useSensors(
     useSensor(MouseSensor, { activationConstraint: { distance: 6 } }),
     useSensor(TouchSensor, { activationConstraint: { delay: 180, tolerance: 8 } }),
@@ -155,6 +156,7 @@ const TaskBoard = ({ tasks, onStatusChange, editingTask, onEdit, onCloseEdit, on
                 status={status}
                 tasks={tasks.filter((task) => task.status === status)}
                 editingTask={editingTask}
+                statusAnimationTaskId={statusAnimationTaskId}
                 onEdit={onEdit}
                 onCloseEdit={onCloseEdit}
                 onSaved={onSaved}

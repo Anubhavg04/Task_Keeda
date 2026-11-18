@@ -206,7 +206,7 @@ const ProjectsPage = () => {
             const taskSummary = project.taskSummary || { total: 0, todo: 0, inProgress: 0, done: 0 };
             const highestOpenPriority = taskPriorityOrder.find((priority) => (taskSummary[priority] || 0) > 0);
             return (
-              <article key={project._id} className={`overflow-hidden rounded-2xl border border-slate-200/80 border-t-[3px] ${theme.edge} bg-white shadow-sm shadow-slate-200/30`}>
+              <article key={project._id} className={`overflow-hidden rounded-2xl border border-slate-200/80 border-t-[3px] ${theme.edge} bg-white shadow-sm shadow-slate-200/30 transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-md hover:shadow-slate-300/40 motion-reduce:transform-none`}>
                 <div className="p-4 md:p-6">
                   <div className="flex items-start gap-3">
                     <span className={`mt-0.5 h-3 w-3 shrink-0 rounded-full ${theme.dot}`} />
@@ -215,7 +215,7 @@ const ProjectsPage = () => {
                       <span className={`mt-2 inline-flex rounded-full px-2.5 py-1 text-[11px] font-semibold ${theme.badge}`}>{isOwner ? 'Owner' : 'Member'}</span>
                     </div>
                     {isOwner && (
-                      <button type="button" onClick={() => handleDeleteProject(project)} disabled={busyProject === project._id} aria-label={`Delete ${project.name}`} title="Delete project" className="min-h-11 min-w-11 rounded-lg px-2 py-1 text-xs font-medium text-slate-400 transition hover:bg-rose-50 hover:text-rose-600 disabled:opacity-50 md:min-h-0 md:min-w-0">Delete</button>
+                      <button type="button" onClick={() => handleDeleteProject(project)} disabled={busyProject === project._id} aria-label={`Delete ${project.name}`} title="Delete project" className="min-h-11 min-w-11 rounded-lg px-2 py-1 text-xs font-medium text-slate-400 transition hover:bg-rose-50 hover:text-rose-600 active:scale-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-orange-600 disabled:opacity-50 md:min-h-0 md:min-w-0">Delete</button>
                     )}
                   </div>
                   <p className="mt-4 min-h-10 text-sm leading-6 text-slate-500">{project.description || 'A shared space to organize work and keep the team moving.'}</p>
@@ -268,7 +268,7 @@ const ProjectsPage = () => {
                     <form className="mt-4 flex flex-col gap-2 md:flex-row" onSubmit={(event) => { event.preventDefault(); handleInvite(project); }}>
                       <label className="sr-only" htmlFor={`invite-${project._id}`}>Invite by email</label>
                       <input id={`invite-${project._id}`} type="email" required maxLength={254} value={memberEmails[project._id] || ''} onChange={(event) => setMemberEmails((current) => ({ ...current, [project._id]: event.target.value }))} placeholder="Add teammate by email" className="min-h-11 min-w-0 flex-1 rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 focus:border-orange-400 focus:outline-none focus:ring-4 focus:ring-orange-50 md:text-xs" />
-                      <button type="submit" disabled={busyProject === project._id} className="min-h-11 rounded-lg bg-slate-900 px-3 py-2 text-sm font-semibold text-white transition hover:bg-slate-700 disabled:opacity-50 md:min-h-0 md:text-xs">{busyProject === project._id ? 'Adding...' : 'Invite'}</button>
+                      <button type="submit" disabled={busyProject === project._id} className="min-h-11 rounded-lg bg-slate-900 px-3 py-2 text-sm font-semibold text-white transition hover:bg-slate-700 active:scale-[0.98] focus-visible:outline focus-visible:outline-2 focus-visible:outline-orange-600 disabled:opacity-50 md:min-h-0 md:text-xs">{busyProject === project._id ? 'Adding...' : 'Invite'}</button>
                     </form>
                   )}
                   <div className="mt-5 grid grid-cols-2 gap-2 border-t border-slate-100 pt-4 md:flex">

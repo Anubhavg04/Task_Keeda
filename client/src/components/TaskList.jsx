@@ -30,8 +30,10 @@ const TaskList = () => {
   const [bulkStatus, setBulkStatus] = useState('');
   const [bulkPriority, setBulkPriority] = useState('');
   const [viewMode, setViewMode] = useState('list');
+  const [statusAnimationTaskId, setStatusAnimationTaskId] = useState('');
   const [page, setPage] = useState(1);
   const selectPageRef = useRef(null);
+  const statusAnimationTimeoutRef = useRef(null);
   const search = searchParams.get('search') || '';
   const projectId = searchParams.get('projectId') || '';
   const showCreateForm = createFormOpen || searchParams.get('new') === '1';
@@ -48,6 +50,10 @@ const TaskList = () => {
       selectPageRef.current.indeterminate = selectedIdsOnPage.length > 0 && !allTasksOnPageSelected;
     }
   }, [selectedIdsOnPage.length, allTasksOnPageSelected]);
+
+  useEffect(() => () => {
+    if (statusAnimationTimeoutRef.current) window.clearTimeout(statusAnimationTimeoutRef.current);
+  }, []);
 
   const loadProjects = useCallback(async () => {
     try {
@@ -103,6 +109,15 @@ const TaskList = () => {
 
   const refreshTasks = () => fetchTasks({ ...filters, search, projectId, page });
 
+  const animateStatusChange = (taskId) => {
+    setStatusAnimationTaskId(taskId);
+    if (statusAnimationTimeoutRef.current) window.clearTimeout(statusAnimationTimeoutRef.current);
+    statusAnimationTimeoutRef.current = window.setTimeout(() => {
+      setStatusAnimationTaskId('');
+      statusAnimationTimeoutRef.current = null;
+    }, 500);
+  };
+
   const toggleDiscussion = (taskId) => {
     const isOpen = activeDiscussionTaskId === taskId;
     if (requestedDiscussionTaskId === taskId) {
@@ -129,6 +144,7 @@ const TaskList = () => {
   const handleStatusChange = async (task, status) => {
     try {
       await updateTask(task._id, { status });
+      animateStatusChange(task._id);
       await refreshTasks();
       toast.success(status === 'done' ? 'Task completed' : 'Task status updated');
     } catch (requestError) {
@@ -285,6 +301,7 @@ const TaskList = () => {
               tasks={tasks}
               onStatusChange={handleStatusChange}
               editingTask={editingTask}
+              statusAnimationTaskId={statusAnimationTaskId}
               onEdit={setEditingTask}
               onCloseEdit={() => setEditingTask(null)}
               onSaved={refreshTasks}
@@ -331,7 +348,7 @@ const TaskList = () => {
             )}
           </div>
           {tasks.map((task) => (
-            <article key={task._id} className={`group rounded-xl border border-slate-200/80 border-l-2 bg-white p-3 shadow-sm shadow-slate-200/20 transition-colors hover:border-orange-200 hover:bg-orange-50/30 focus-within:border-orange-200 ${task.status === 'done' ? 'border-l-emerald-600' : task.status === 'in-progress' ? 'border-l-orange-600' : 'border-l-slate-500'}`}>
+            <article key={task._id} className={`group rounded-xl border border-slate-200/80 border-l-2 bg-white p-3 shadow-sm shadow-slate-200/20 transition-all duration-200 ease-out hover:-translate-y-0.5 hover:bg-orange-50/30 hover:shadow-md hover:shadow-slate-300/40 motion-reduce:transform-none ${task.status === 'done' ? 'border-l-emerald-600' : task.status === 'in-progress' ? 'border-l-orange-600' : 'border-l-slate-500'} ${statusAnimationTaskId === task._id ? 'task-status-pop' : ''}`}>
               {editingTask?._id === task._id ? (
                 <TaskForm task={task} onClose={() => setEditingTask(null)} onSaved={refreshTasks} />
               ) : (
@@ -400,7 +417,7 @@ const TaskList = () => {
                       onClick={() => { setDiscussionTaskId(''); setEditingTask(task); }}
                       aria-label={`Edit ${task.title}`}
                       title="Edit task"
-                      className="inline-flex h-11 w-11 items-center justify-center rounded-lg text-slate-500 transition hover:bg-white hover:text-orange-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-orange-600"
+                      className="inline-flex h-11 w-11 items-center justify-center rounded-lg text-slate-500 transition hover:bg-white hover:text-orange-800 active:scale-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-orange-600"
                     ><LuPencil aria-hidden="true" className="h-4 w-4" /></button>
                     <button
                       type="button"
@@ -408,10 +425,10 @@ const TaskList = () => {
                       disabled={task.status !== 'done' && (task.dependsOn || []).some((dependency) => dependency && dependency.status !== 'done')}
                       aria-label={task.status === 'done' ? `Reopen ${task.title}` : `Complete ${task.title}`}
                       title={task.status !== 'done' && (task.dependsOn || []).some((dependency) => dependency && dependency.status !== 'done') ? 'Complete prerequisite tasks first' : task.status === 'done' ? 'Reopen task' : 'Complete task'}
-                      className={`inline-flex h-11 w-11 items-center justify-center rounded-lg transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-orange-600 disabled:cursor-not-allowed disabled:opacity-40 ${task.status === 'done' ? 'text-emerald-700 hover:bg-emerald-50' : 'text-slate-500 hover:bg-white hover:text-emerald-700'}`}
+                      className={`inline-flex h-11 w-11 items-center justify-center rounded-lg transition hover:scale-105 active:scale-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-orange-600 disabled:cursor-not-allowed disabled:opacity-40 ${task.status === 'done' ? 'text-emerald-700 hover:bg-emerald-50' : 'text-slate-500 hover:bg-white hover:text-emerald-700'}`}
                     ><LuCheck aria-hidden="true" className="h-4 w-4" /></button>
                     <details className="relative">
-                      <summary aria-label={`More actions for ${task.title}`} title="More actions" className="flex h-11 w-11 cursor-pointer list-none items-center justify-center rounded-lg text-slate-500 transition hover:bg-white hover:text-slate-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-orange-600 [&::-webkit-details-marker]:hidden">
+                      <summary aria-label={`More actions for ${task.title}`} title="More actions" className="flex h-11 w-11 cursor-pointer list-none items-center justify-center rounded-lg text-slate-500 transition hover:bg-white hover:text-slate-800 active:scale-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-orange-600 [&::-webkit-details-marker]:hidden">
                         <LuEllipsis aria-hidden="true" className="h-5 w-5" />
                       </summary>
                       <div className="absolute right-0 top-full z-20 mt-1 w-52 rounded-xl border border-slate-200 bg-white p-2 shadow-xl">

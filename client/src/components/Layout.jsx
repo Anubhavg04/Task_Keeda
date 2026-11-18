@@ -190,7 +190,7 @@ const Layout = ({ children }) => {
         <div className="min-h-0 flex-1 overflow-y-auto px-4 pb-3 pt-6">
           <div className="mb-3 px-3 text-[11px] font-semibold uppercase tracking-[0.13em] text-slate-400">Workspace</div>
           <div className="relative mb-5">
-            <button type="button" aria-expanded={workspaceMenuOpen} aria-haspopup="menu" onClick={() => setWorkspaceMenuOpen((open) => !open)} className="flex w-full items-center gap-3 rounded-xl bg-slate-50 p-3 text-left transition hover:bg-orange-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-orange-700">
+            <button type="button" aria-expanded={workspaceMenuOpen} aria-haspopup="menu" onClick={() => setWorkspaceMenuOpen((open) => !open)} className="flex w-full items-center gap-3 rounded-xl bg-slate-50 p-3 text-left transition duration-150 hover:bg-orange-50 active:scale-[0.99] focus-visible:outline focus-visible:outline-2 focus-visible:outline-orange-700">
               <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-orange-100 text-sm font-bold text-orange-800">
                 {(user?.fullname || 'Y').slice(0, 1).toUpperCase()}
               </div>
@@ -202,11 +202,11 @@ const Layout = ({ children }) => {
             </button>
             {workspaceMenuOpen && (
               <div role="menu" aria-label="Choose a workspace" className="absolute left-0 right-0 top-full z-30 mt-2 max-h-72 overflow-y-auto rounded-xl border border-slate-200 bg-white p-1.5 shadow-xl">
-                <button type="button" role="menuitem" onClick={() => openWorkspace()} className="w-full rounded-lg px-3 py-2 text-left text-sm font-medium text-slate-700 hover:bg-slate-50">All workspaces</button>
-                <button type="button" role="menuitem" onClick={() => openWorkspace('personal')} className="w-full rounded-lg px-3 py-2 text-left text-sm font-medium text-slate-700 hover:bg-slate-50">Personal workspace</button>
+                <button type="button" role="menuitem" onClick={() => openWorkspace()} className="w-full rounded-lg px-3 py-2 text-left text-sm font-medium text-slate-700 transition hover:bg-slate-50 active:scale-[0.99]">All workspaces</button>
+                <button type="button" role="menuitem" onClick={() => openWorkspace('personal')} className="w-full rounded-lg px-3 py-2 text-left text-sm font-medium text-slate-700 transition hover:bg-slate-50 active:scale-[0.99]">Personal workspace</button>
                 {projects.length > 0 && <p className="px-3 pb-1 pt-3 text-[10px] font-bold uppercase tracking-wider text-slate-400">Team workspaces</p>}
                 {projects.map((project) => (
-                  <button key={project._id} type="button" role="menuitem" onClick={() => openWorkspace(project._id)} className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm text-slate-700 hover:bg-orange-50 hover:text-orange-900">
+                  <button key={project._id} type="button" role="menuitem" onClick={() => openWorkspace(project._id)} className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm text-slate-700 transition hover:bg-orange-50 hover:text-orange-900 active:scale-[0.99]">
                     <span className={`h-2 w-2 shrink-0 rounded-full ${projectDots[project.color] || projectDots.orange}`} />
                     <span className="truncate">{project.name}</span>
                   </button>
@@ -225,7 +225,7 @@ const Layout = ({ children }) => {
                   key={item.path}
                   to={item.path}
                   aria-current={active ? 'page' : undefined}
-                  className={`group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition ${
+                  className={`group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition duration-150 hover:translate-x-0.5 active:scale-[0.99] focus-visible:outline focus-visible:outline-2 focus-visible:outline-orange-700 motion-reduce:transform-none ${
                     active
                       ? 'bg-orange-50 text-orange-800'
                       : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
@@ -239,7 +239,7 @@ const Layout = ({ children }) => {
           </nav>
           <div className="mb-3 mt-9 flex items-center justify-between px-3">
             <span className="text-[11px] font-semibold uppercase tracking-[0.13em] text-slate-400">Team workspaces</span>
-            <Link to="/projects" aria-label="Create or manage projects" className="rounded p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-700"><LuPlus aria-hidden="true" className="h-4 w-4" /></Link>
+            <Link to="/projects" aria-label="Create or manage projects" className="rounded p-1 text-slate-400 transition hover:bg-slate-100 hover:text-slate-700 active:scale-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-orange-700"><LuPlus aria-hidden="true" className="h-4 w-4" /></Link>
           </div>
           <Link to="/projects" className="flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-slate-500 transition hover:bg-slate-50 hover:text-orange-800">
             <span className="flex h-5 w-5 items-center justify-center rounded-md border border-dashed border-slate-300"><LuPlus aria-hidden="true" className="h-3.5 w-3.5" /></span>
@@ -248,7 +248,7 @@ const Layout = ({ children }) => {
           {projects.length > 0 && (
             <div className="mt-2 space-y-0.5">
               {projects.slice(0, 4).map((project) => (
-                <Link key={project._id} to={`/tasks?projectId=${project._id}`} className="flex min-w-0 items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-slate-600 transition hover:bg-slate-50 hover:text-orange-800">
+                <Link key={project._id} to={`/tasks?projectId=${project._id}`} className="flex min-w-0 items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-slate-600 transition duration-150 hover:translate-x-0.5 hover:bg-slate-50 hover:text-orange-800 active:scale-[0.99] focus-visible:outline focus-visible:outline-2 focus-visible:outline-orange-700 motion-reduce:transform-none">
                   <span className={`h-2 w-2 shrink-0 rounded-full ${projectDots[project.color] || projectDots.orange}`} />
                   <span className="truncate">{project.name}</span>
                 </Link>
@@ -285,7 +285,7 @@ const Layout = ({ children }) => {
                 aria-label="Open navigation menu"
                 aria-expanded={mobileNavOpen}
                 aria-controls="mobile-navigation-drawer"
-                className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-lg text-slate-600 transition hover:bg-orange-50 hover:text-orange-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-orange-700 md:hidden"
+                className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-lg text-slate-600 transition hover:bg-orange-50 hover:text-orange-800 active:scale-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-orange-700 md:hidden"
               >
                 <LuMenu aria-hidden="true" className="h-5 w-5" />
               </button>
@@ -332,7 +332,7 @@ const Layout = ({ children }) => {
             {navigation.map((item) => {
               const active = location.pathname === item.path;
               return (
-                <Link key={item.path} to={item.path} aria-current={active ? 'page' : undefined} className={`flex min-h-11 shrink-0 items-center gap-2 rounded-lg px-3 py-2 text-xs font-medium ${active ? 'bg-orange-50 text-orange-800' : 'text-slate-500 hover:bg-slate-50'}`}>
+                <Link key={item.path} to={item.path} aria-current={active ? 'page' : undefined} className={`flex min-h-11 shrink-0 items-center gap-2 rounded-lg px-3 py-2 text-xs font-medium transition duration-150 active:scale-[0.99] focus-visible:outline focus-visible:outline-2 focus-visible:outline-orange-700 ${active ? 'bg-orange-50 text-orange-800' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-800'}`}>
                   <item.icon aria-hidden="true" className="h-4 w-4" />
                   {item.label}
                 </Link>
@@ -369,7 +369,7 @@ const Layout = ({ children }) => {
                       to={item.path}
                       onClick={() => setMobileNavOpen(false)}
                       aria-current={active ? 'page' : undefined}
-                      className={`flex min-h-11 items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition ${active ? 'bg-orange-50 text-orange-800' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'}`}
+                      className={`flex min-h-11 items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition duration-150 hover:translate-x-0.5 active:scale-[0.99] focus-visible:outline focus-visible:outline-2 focus-visible:outline-orange-700 motion-reduce:transform-none ${active ? 'bg-orange-50 text-orange-800' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'}`}
                     >
                       <item.icon aria-hidden="true" className={`h-[18px] w-[18px] ${active ? 'text-orange-700' : 'text-slate-400'}`} />
                       {item.label}
