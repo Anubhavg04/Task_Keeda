@@ -2,10 +2,10 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useSearchParams } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import { LuPlus } from 'react-icons/lu';
+import { LuFolderPlus, LuPlus } from 'react-icons/lu';
 import { useAuth } from '../context/useAuth.js';
 import { discussionAPI, projectAPI } from '../services/api.js';
-import { EmptyState, ErrorState, LoadingState, PageHeading, buttonPrimary, inputClass } from '../components/WorkspaceUI.jsx';
+import { EmptyState, ErrorState, PageHeading, ProjectsCardsSkeleton, buttonPrimary, inputClass } from '../components/WorkspaceUI.jsx';
 
 const colors = {
   orange: { edge: 'border-t-orange-500', badge: 'bg-orange-50 text-orange-700', dot: 'bg-orange-500', button: 'text-orange-700 hover:bg-orange-50' },
@@ -33,15 +33,21 @@ const ProjectsPage = () => {
     setLoading(true);
     setError('');
     try {
-      const [projectsResponse, summariesResponse] = await Promise.all([
+      const [projectsResult, summariesResult] = await Promise.allSettled([
         projectAPI.getProjects(),
         discussionAPI.getSummaries(),
       ]);
+      if (projectsResult.status === 'rejected') throw projectsResult.reason;
+      const projectsResponse = projectsResult.value;
       setProjects(projectsResponse.data);
-      setDiscussionSummaries(Object.fromEntries(
-        summariesResponse.data.map((summary) => [String(summary.projectId), summary])
-      ));
-      setDiscussionSummaryError('');
+      if (summariesResult.status === 'fulfilled') {
+        setDiscussionSummaries(Object.fromEntries(
+          summariesResult.value.data.map((summary) => [String(summary.projectId), summary])
+        ));
+        setDiscussionSummaryError('');
+      } else {
+        setDiscussionSummaryError(summariesResult.reason.response?.data?.message || 'Chat previews could not be loaded.');
+      }
     } catch (requestError) {
       setError(requestError.response?.data?.message || 'Could not load projects.');
     } finally {
@@ -184,9 +190,9 @@ const ProjectsPage = () => {
       )}
 
       {error && <div className="mb-5"><ErrorState message={error} onRetry={loadProjects} /></div>}
-      {discussionSummaryError && <p role="status" className="mb-4 text-xs text-amber-700">{discussionSummaryError}</p>}
-      {error ? null : loading ? <LoadingState label="Loading your projects..." /> : projects.length === 0 ? (
-        <EmptyState title="Give your team a shared home" description="Create a team workspace to bring people, tasks, and reference notes together. You can invite registered TaskFlow users after creating it." action={<button type="button" onClick={() => setShowCreate(true)} className={buttonPrimary}>Create your first team workspace</button>} />
+      {discussionSummaryError && <div className="mb-4"><ErrorState message={discussionSummaryError} onRetry={refreshDiscussionSummaries} /></div>}
+      {error ? null : loading ? <ProjectsCardsSkeleton /> : projects.length === 0 ? (
+        <EmptyState icon={LuFolderPlus} title="No projects yet" description="Create a team workspace to bring people, tasks, and reference notes together. You can invite registered TaskFlow users after creating it." action={<button type="button" onClick={() => setShowCreate(true)} className={buttonPrimary}>Create your first project</button>} />
       ) : (
         <section aria-label="Projects" className="grid gap-5 md:grid-cols-2 2xl:grid-cols-3">
           {projects.map((project) => {

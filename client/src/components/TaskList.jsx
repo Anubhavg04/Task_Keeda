@@ -1,12 +1,12 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import { LuCircleAlert, LuCheck, LuGitBranch, LuListChecks, LuMessageCircle, LuPlus, LuX } from 'react-icons/lu';
+import { LuCircleAlert, LuCheck, LuGitBranch, LuListChecks, LuListTodo, LuMessageCircle, LuPlus, LuX } from 'react-icons/lu';
 import { useTasks } from '../hooks/useTasks.js';
 import { projectAPI } from '../services/api.js';
 import DiscussionThread from './DiscussionThread.jsx';
 import TaskForm from './TaskForm.jsx';
-import { EmptyState, ErrorState, LoadingState, PageHeading, buttonPrimary, inputClass } from './WorkspaceUI.jsx';
+import { EmptyState, ErrorState, PageHeading, TasksListSkeleton, buttonPrimary, inputClass } from './WorkspaceUI.jsx';
 import { formatDateOnly } from '../utils/dates.js';
 
 const priorityStyles = {
@@ -50,6 +50,7 @@ const TaskList = () => {
     : discussionTaskId;
   const selectedIdsOnPage = tasks.filter((task) => selectedTaskIds.includes(task._id)).map((task) => task._id);
   const allTasksOnPageSelected = tasks.length > 0 && selectedIdsOnPage.length === tasks.length;
+  const hasTaskFilters = Boolean(search || filters.status || filters.priority || projectId);
 
   useEffect(() => {
     if (selectPageRef.current) {
@@ -57,11 +58,19 @@ const TaskList = () => {
     }
   }, [selectedIdsOnPage.length, allTasksOnPageSelected]);
 
-  useEffect(() => {
-    projectAPI.getProjects()
-      .then((response) => setProjects(response.data))
-      .catch((requestError) => setProjectsError(requestError.response?.data?.message || 'Project list could not be loaded.'));
+  const loadProjects = useCallback(async () => {
+    try {
+      const response = await projectAPI.getProjects();
+      setProjects(response.data);
+      setProjectsError('');
+    } catch (requestError) {
+      setProjectsError(requestError.response?.data?.message || 'Project list could not be loaded.');
+    }
   }, []);
+
+  useEffect(() => {
+    Promise.resolve().then(loadProjects);
+  }, [loadProjects]);
 
   useEffect(() => {
     fetchTasks({ ...filters, search, projectId, page });
@@ -243,15 +252,16 @@ const TaskList = () => {
             </select>
           </label>
         </div>
-        {projectsError && <p role="alert" className="mt-3 text-xs text-rose-600">{projectsError} <Link to="/projects" className="font-semibold underline">Manage projects</Link></p>}
+        {projectsError && <div className="mt-3"><ErrorState message={projectsError} onRetry={loadProjects} /> <Link to="/projects" className="mt-2 inline-block text-xs font-semibold text-orange-800 underline">Manage projects</Link></div>}
       </section>
 
       {error && <ErrorState message={error} onRetry={refreshTasks} />}
-      {loading && tasks.length === 0 ? <LoadingState label="Loading your tasks..." /> : error && tasks.length === 0 ? null : tasks.length === 0 ? (
+      {loading && tasks.length === 0 ? <TasksListSkeleton /> : error && tasks.length === 0 ? null : tasks.length === 0 ? (
         <EmptyState
-          title={search || filters.status || filters.priority ? 'No tasks match these filters' : 'Ready when you are'}
-          description={search || filters.status || filters.priority ? 'Try adjusting the filters or start fresh.' : 'Capture your first task and give your day some direction.'}
-          action={<button type="button" onClick={() => setCreateFormOpen(true)} className={buttonPrimary}><LuPlus aria-hidden="true" className="h-4 w-4" />Create a task</button>}
+          title={hasTaskFilters ? 'No tasks match these filters' : 'No tasks yet'}
+          description={hasTaskFilters ? 'Try adjusting the filters or start fresh.' : 'Capture your first task and give your day some direction.'}
+          icon={LuListTodo}
+          action={<button type="button" onClick={() => setCreateFormOpen(true)} className={buttonPrimary}><LuPlus aria-hidden="true" className="h-4 w-4" />{hasTaskFilters ? 'Create a task' : 'Create your first task'}</button>}
         />
       ) : (
         <section aria-label="Task list" className="space-y-3">

@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { LuArrowDownToLine, LuBriefcaseBusiness, LuCircleAlert, LuCircleCheck, LuTrendingUp } from 'react-icons/lu';
 import toast from 'react-hot-toast';
 import { taskAPI } from '../services/api.js';
-import { ErrorState, LoadingState, MetricCard, PageHeading, buttonSecondary } from '../components/WorkspaceUI.jsx';
+import { ErrorState, MetricCard, PageHeading, ReportsSkeleton, buttonSecondary } from '../components/WorkspaceUI.jsx';
 import { formatDateOnly } from '../utils/dates.js';
 
 const priorityTones = {
@@ -97,7 +97,7 @@ const ReportsPage = () => {
       />
 
       {error && <ErrorState message={error} onRetry={loadReport} />}
-      {error ? null : loading ? <LoadingState label="Calculating workspace insights..." /> : (
+      {error ? null : loading ? <ReportsSkeleton /> : (
         <>
           <section aria-label="Task report summary" className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
             <MetricCard label="Total tasks" value={summary?.total || 0} caption={`${summary?.projects || 0} shared projects`} icon={LuBriefcaseBusiness} tone="orange" />
