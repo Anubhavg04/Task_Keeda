@@ -95,6 +95,39 @@ const JoinCard = ({ title = 'Ready to make this workspace yours?', description =
   </aside>
 );
 
+const DemoSignupPrompt = ({ message, onClose }) => {
+  useEffect(() => {
+    const closeOnEscape = (event) => {
+      if (event.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', closeOnEscape);
+    return () => window.removeEventListener('keydown', closeOnEscape);
+  }, [onClose]);
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/40 p-4" onClick={onClose}>
+      <section
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="demo-signup-title"
+        className="w-full max-w-sm rounded-2xl border border-slate-200 bg-white p-6 shadow-xl"
+        onClick={(event) => event.stopPropagation()}
+      >
+        <h2 id="demo-signup-title" className="text-lg font-semibold text-slate-900">Keep your work moving</h2>
+        <p className="mt-2 text-sm leading-6 text-slate-600">{message}</p>
+        <div className="mt-5 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+          <button type="button" onClick={onClose} className="inline-flex items-center justify-center rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">
+            Keep exploring
+          </button>
+          <Link to="/register" className="inline-flex items-center justify-center rounded-lg bg-orange-700 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-orange-800">
+            Create account
+          </Link>
+        </div>
+      </section>
+    </div>
+  );
+};
+
 const DemoTaskRow = ({ task }) => (
   <li className="flex items-center gap-3 border-b border-slate-100 px-4 py-3.5 last:border-0 sm:px-5">
     <span className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${task.status === 'Done' ? 'bg-emerald-50 text-emerald-700' : task.status === 'In progress' ? 'bg-amber-50 text-amber-700' : 'bg-slate-100 text-slate-500'}`}>
@@ -234,7 +267,7 @@ const Dashboard = () => (
   </div>
 );
 
-const TasksView = () => {
+const TasksView = ({ onRestrictedAction }) => {
   const [query, setQuery] = useState('');
   const [status, setStatus] = useState('');
   const filteredTasks = demoTasks.filter((task) => (
@@ -256,7 +289,7 @@ const TasksView = () => {
             <option value="">All statuses</option><option>To do</option><option>In progress</option><option>Done</option>
           </select>
         </label>
-        <Link to="/register" className="inline-flex items-center justify-center gap-2 rounded-lg bg-orange-700 px-4 py-2.5 text-sm font-semibold text-white"><LuPlus aria-hidden="true" className="h-4 w-4" />Create task</Link>
+        <button type="button" onClick={() => onRestrictedAction('Create your free account to add real tasks')} className="inline-flex items-center justify-center gap-2 rounded-lg bg-orange-700 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-orange-800"><LuPlus aria-hidden="true" className="h-4 w-4" />Create task</button>
       </div>
       <div className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm">
         <div className="border-b border-slate-100 px-5 py-4"><h2 className="font-semibold text-slate-900">Sample tasks</h2><p className="mt-1 text-xs text-slate-500">Filter and explore the demo data. Sign up to manage your own.</p></div>
@@ -384,13 +417,16 @@ const pageContent = {
 
 const DemoWorkspace = () => {
   const { pathname } = useLocation();
+  const [signupPrompt, setSignupPrompt] = useState('');
   const activePath = navigation.find((item) => item.path === pathname)?.path || '/';
-  const page = pageContent[activePath];
+  const page = activePath === '/tasks'
+    ? { ...pageContent[activePath], view: <TasksView onRestrictedAction={setSignupPrompt} /> }
+    : pageContent[activePath];
 
   return (
     <div className="py-6 sm:py-8">
       <div className="mb-5 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-orange-200/80 bg-orange-50/80 px-4 py-3">
-        <p className="text-sm text-orange-950"><span className="font-semibold">You’re exploring a demo.</span> This sample data is here to help you look around.</p>
+        <p className="text-sm text-orange-950"><span className="font-semibold">You're exploring a demo with sample data.</span> Sign up to create and edit real tasks.</p>
         <Link to="/register" className="inline-flex shrink-0 items-center gap-1 text-sm font-semibold text-orange-800 hover:text-orange-950">Make it yours <LuArrowRight aria-hidden="true" className="h-4 w-4" /></Link>
       </div>
 
@@ -424,6 +460,7 @@ const DemoWorkspace = () => {
           {page.view}
         </main>
       </div>
+      {signupPrompt && <DemoSignupPrompt message={signupPrompt} onClose={() => setSignupPrompt('')} />}
     </div>
   );
 };
