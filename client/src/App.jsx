@@ -7,6 +7,7 @@ import Layout from './components/Layout.jsx';
 import ProtectedRoute from './utils/ProtectedRoute.jsx';
 
 const DemoWorkspace = lazy(() => import('./components/DemoWorkspace.jsx'));
+const LandingPage = lazy(() => import('./pages/LandingPage.jsx'));
 const HomePage = lazy(() => import('./pages/HomePage.jsx'));
 const LoginPage = lazy(() => import('./pages/LoginPage.jsx'));
 const RegisterPage = lazy(() => import('./pages/RegisterPage.jsx'));
@@ -72,7 +73,7 @@ function App() {
         <Layout>
           <Suspense fallback={<RouteLoadingState />}>
             <Routes>
-              <Route path="/" element={protectedPage(<HomePage />)} />
+              <Route path="/" element={<ProtectedRoute demo={<LandingPage />}><HomePage /></ProtectedRoute>} />
               <Route path="/tasks" element={protectedPage(<TaskList />)} />
               <Route path="/projects" element={protectedPage(<ProjectsPage />)} />
               <Route path="/projects/:projectId/chat" element={protectedPage(<ProjectChatPage />)} />

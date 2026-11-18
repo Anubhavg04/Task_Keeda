@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import {
   LuArrowRight,
+  LuArrowDown,
   LuCalendarDays,
   LuChartNoAxesColumn,
   LuCheck,
@@ -19,6 +20,7 @@ import {
   LuPlus,
   LuSearch,
   LuRotateCcw,
+  LuSparkles,
   LuTarget,
   LuUsersRound,
   LuX,
@@ -529,13 +531,24 @@ const DemoWorkspace = () => {
     : pageContent[activePath];
 
   return (
-    <div className="py-6 sm:py-8">
-      <div role="note" aria-label="Demo workspace" className="mb-6 flex flex-col items-stretch gap-3 rounded-2xl border border-orange-200/80 bg-gradient-to-r from-orange-50 to-white p-3.5 shadow-sm sm:flex-row sm:items-center sm:justify-between sm:px-4 sm:py-3">
-        <div className="flex min-w-0 flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
-          <span className="w-fit rounded-md bg-orange-100 px-2 py-1 text-[10px] font-bold uppercase tracking-[0.12em] text-orange-800">Demo</span>
-          <p className="min-w-0 text-sm leading-6 text-orange-950"><span className="font-semibold">You're exploring a demo with sample data.</span> Sign up to create and edit real tasks.</p>
+    <div className="pb-32 pt-5 sm:pb-28 sm:pt-7">
+      <section className="mb-4 flex flex-col gap-4 rounded-2xl border border-orange-100 bg-gradient-to-br from-white via-[#fffdf9] to-orange-50/70 p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between sm:p-5">
+        <div className="max-w-2xl">
+          <div className="inline-flex items-center gap-1.5 rounded-full bg-orange-100/80 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-orange-800">
+            <LuSparkles aria-hidden="true" className="h-3 w-3" />
+            Interactive demo
+          </div>
+          <h1 className="mt-2 text-xl font-bold leading-7 tracking-tight text-slate-950 sm:text-2xl">See how TaskFlow brings your work together.</h1>
+          <p className="mt-1 text-sm leading-6 text-slate-600">Explore sample tasks, projects, and plans below. Click around and get a feel for a calmer way to work.</p>
         </div>
-        <Link to="/register" className="inline-flex min-h-11 shrink-0 items-center justify-center gap-1 rounded-lg bg-orange-700 px-3 text-sm font-semibold text-white shadow-sm transition hover:bg-orange-800 active:scale-[0.98] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange-700 sm:min-h-10">Make it yours <LuArrowRight aria-hidden="true" className="h-4 w-4" /></Link>
+        <a href="#interactive-demo" className="inline-flex min-h-11 shrink-0 items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-3.5 text-sm font-semibold text-slate-700 shadow-sm transition hover:border-orange-200 hover:bg-orange-50/60 hover:text-orange-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange-700">
+          Explore the workspace <LuArrowDown aria-hidden="true" className="h-4 w-4" />
+        </a>
+      </section>
+
+      <div role="note" aria-label="Demo workspace" className="mb-5 flex items-center gap-2.5 rounded-xl border border-orange-100 bg-orange-50/60 px-3 py-2.5 text-xs leading-5 text-orange-950">
+        <span className="shrink-0 rounded-md bg-white/80 px-2 py-0.5 text-[9px] font-bold uppercase tracking-[0.1em] text-orange-800">Demo</span>
+        <p><span className="font-semibold">You're exploring a demo with sample data.</span> Sign up to create and edit real tasks.</p>
       </div>
 
       <div className="grid items-start gap-6 lg:grid-cols-[205px_minmax(0,1fr)]">
@@ -558,11 +571,21 @@ const DemoWorkspace = () => {
           </div>
         </nav>
 
-        <main className="min-w-0 space-y-6">
+        <main id="interactive-demo" className="min-w-0 scroll-mt-6 space-y-5 rounded-2xl border border-slate-200/80 bg-white/90 p-4 shadow-sm shadow-slate-200/30 sm:p-5 lg:p-6">
+          <div className="flex items-center justify-between gap-3 border-b border-slate-100 pb-3">
+            <span className="inline-flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.13em] text-slate-500">
+              <span aria-hidden="true" className="relative flex h-2 w-2">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-40" />
+                <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
+              </span>
+              Live demo
+            </span>
+            <span className="text-[10px] text-slate-400 sm:text-xs">Sample workspace</span>
+          </div>
           <header className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
             <div>
               <p className="mb-2 text-[11px] font-bold uppercase tracking-[0.16em] text-orange-700">{page.eyebrow}</p>
-              <h1 className="text-2xl font-bold tracking-tight text-slate-950 sm:text-3xl">{page.title}</h1>
+              <h2 className="text-xl font-bold tracking-tight text-slate-950 sm:text-2xl">{page.title}</h2>
               <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500">{page.description}</p>
             </div>
             <Link to="/register" className="inline-flex shrink-0 items-center justify-center gap-2 rounded-lg bg-orange-700 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-orange-800"><LuPlus aria-hidden="true" className="h-4 w-4" />Start using TaskFlow</Link>
@@ -571,6 +594,15 @@ const DemoWorkspace = () => {
         </main>
       </div>
       {signupPrompt && <DemoSignupPrompt message={signupPrompt} onClose={() => setSignupPrompt('')} />}
+      <aside aria-label="Create your TaskFlow account" className="fixed bottom-3 left-3 right-3 z-40 flex flex-col gap-2.5 rounded-2xl border border-slate-200/80 bg-white/95 p-3 shadow-xl shadow-slate-900/10 backdrop-blur sm:bottom-5 sm:left-auto sm:right-6 sm:max-w-md sm:flex-row sm:items-center sm:gap-4 sm:p-3.5">
+        <div className="min-w-0 flex-1">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-orange-800">Like what you see?</p>
+          <p className="mt-0.5 text-sm font-semibold leading-5 text-slate-900">Make TaskFlow yours.</p>
+        </div>
+        <Link to="/register" className="inline-flex min-h-11 shrink-0 items-center justify-center gap-2 rounded-lg bg-orange-700 px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-orange-800 active:scale-[0.98] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange-700">
+          Create your free account <LuArrowRight aria-hidden="true" className="h-4 w-4" />
+        </Link>
+      </aside>
     </div>
   );
 };

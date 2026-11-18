@@ -18,17 +18,17 @@ const SignupShowcase = () => (
     <div className="mx-auto w-full max-w-xl">
       <div className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-orange-200">
         <LuLayers3 aria-hidden="true" className="h-4 w-4" />
-        One home for work that matters
+        A calmer way to work
       </div>
 
       <div className="mt-7 max-w-lg sm:mt-10">
-        <p className="text-sm font-semibold text-emerald-200">Plan clearly. Move together.</p>
+        <p className="text-sm font-semibold text-emerald-200">Tasks, projects, and focus in one place.</p>
         <h2 className="mt-3 text-3xl font-semibold leading-tight tracking-tight sm:text-4xl xl:text-[2.8rem]">
-          From busywork
-          <span className="block text-orange-300">to real momentum.</span>
+          One calm workspace.
+          <span className="block text-orange-300">More room to focus.</span>
         </h2>
         <p className="mt-4 max-w-md text-sm leading-6 text-slate-300 sm:text-base sm:leading-7">
-          Bring personal tasks, team projects, and the next important decision into one calm, connected workspace.
+          Bring personal tasks, team projects, and deadlines into one clear space. Then make room for the work that matters next.
         </p>
       </div>
 
