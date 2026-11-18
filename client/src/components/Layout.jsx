@@ -44,6 +44,36 @@ const projectDots = {
   rose: 'bg-rose-500',
 };
 
+const isNavigationActive = (pathname, path) => pathname === path || (path !== '/' && pathname.startsWith(`${path}/`));
+
+const NavigationLink = ({ item, active, horizontal = false, onClick }) => {
+  const indicatorPosition = horizontal
+    ? 'inset-x-3 bottom-0 h-[3px] w-auto'
+    : 'inset-y-2 left-0 w-[3px]';
+
+  return (
+    <Link
+      to={item.path}
+      onClick={onClick}
+      aria-current={active ? 'page' : undefined}
+      className={`group relative flex min-h-11 items-center rounded-lg font-medium transition-all duration-150 active:scale-[0.99] focus-visible:outline focus-visible:outline-2 focus-visible:outline-orange-700 ${
+        horizontal ? 'shrink-0 gap-2 px-3 py-2 text-xs' : 'gap-3 px-3 py-2.5 text-sm hover:translate-x-0.5 motion-reduce:transform-none'
+      } ${
+        active
+          ? 'bg-orange-50 text-orange-950 shadow-sm ring-1 ring-orange-100'
+          : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+      }`}
+    >
+      <span
+        aria-hidden="true"
+        className={`pointer-events-none absolute rounded-full bg-orange-700 transition-opacity duration-150 ${indicatorPosition} ${active ? 'opacity-100' : 'opacity-0 group-hover:opacity-25'}`}
+      />
+      <item.icon aria-hidden="true" className={`shrink-0 ${horizontal ? 'h-4 w-4' : 'h-5 w-5'} ${active ? 'text-orange-800' : 'text-slate-400 group-hover:text-slate-600'}`} />
+      <span className="truncate">{item.label}</span>
+    </Link>
+  );
+};
+
 const Layout = ({ children }) => {
   const { user, logout, isAuthenticated, loading } = useAuth();
   const location = useLocation();
@@ -218,24 +248,9 @@ const Layout = ({ children }) => {
             )}
           </div>
           <nav aria-label="Main navigation" className="space-y-1">
-            {navigation.map((item) => {
-              const active = location.pathname === item.path || (item.path !== '/' && location.pathname.startsWith(`${item.path}/`));
-              return (
-                <Link
-                  key={item.path}
-                  to={item.path}
-                  aria-current={active ? 'page' : undefined}
-                  className={`group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition duration-150 hover:translate-x-0.5 active:scale-[0.99] focus-visible:outline focus-visible:outline-2 focus-visible:outline-orange-700 motion-reduce:transform-none ${
-                    active
-                      ? 'bg-orange-50 text-orange-800'
-                      : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
-                  }`}
-                >
-                  <item.icon aria-hidden="true" className={`h-[18px] w-[18px] ${active ? 'text-orange-700' : 'text-slate-400 group-hover:text-slate-600'}`} />
-                  {item.label}
-                </Link>
-              );
-            })}
+            {navigation.map((item) => (
+              <NavigationLink key={item.path} item={item} active={isNavigationActive(location.pathname, item.path)} />
+            ))}
           </nav>
           <div className="mb-3 mt-9 flex items-center justify-between px-3">
             <span className="text-[11px] font-semibold uppercase tracking-[0.13em] text-slate-400">Team workspaces</span>
@@ -329,15 +344,9 @@ const Layout = ({ children }) => {
             </div>
           </div>
           <nav aria-label="Mobile navigation" className="hidden gap-1 overflow-x-auto border-t border-slate-100 px-3 py-2 md:flex lg:hidden">
-            {navigation.map((item) => {
-              const active = location.pathname === item.path;
-              return (
-                <Link key={item.path} to={item.path} aria-current={active ? 'page' : undefined} className={`flex min-h-11 shrink-0 items-center gap-2 rounded-lg px-3 py-2 text-xs font-medium transition duration-150 active:scale-[0.99] focus-visible:outline focus-visible:outline-2 focus-visible:outline-orange-700 ${active ? 'bg-orange-50 text-orange-800' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-800'}`}>
-                  <item.icon aria-hidden="true" className="h-4 w-4" />
-                  {item.label}
-                </Link>
-              );
-            })}
+            {navigation.map((item) => (
+              <NavigationLink key={item.path} item={item} active={isNavigationActive(location.pathname, item.path)} horizontal />
+            ))}
           </nav>
         </header>
         <main className="mx-auto min-h-[calc(100vh-68px)] max-w-[1440px] px-4 pb-10 sm:px-7 lg:px-9">
@@ -361,21 +370,9 @@ const Layout = ({ children }) => {
                 <p className="mt-1 text-xs text-slate-500">{activeProject ? 'Shared team workspace' : `${projects.length} team workspace${projects.length === 1 ? '' : 's'}`}</p>
               </div>
               <nav aria-label="Main navigation" className="space-y-1">
-                {navigation.map((item) => {
-                  const active = location.pathname === item.path || (item.path !== '/' && location.pathname.startsWith(`${item.path}/`));
-                  return (
-                    <Link
-                      key={item.path}
-                      to={item.path}
-                      onClick={() => setMobileNavOpen(false)}
-                      aria-current={active ? 'page' : undefined}
-                      className={`flex min-h-11 items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition duration-150 hover:translate-x-0.5 active:scale-[0.99] focus-visible:outline focus-visible:outline-2 focus-visible:outline-orange-700 motion-reduce:transform-none ${active ? 'bg-orange-50 text-orange-800' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'}`}
-                    >
-                      <item.icon aria-hidden="true" className={`h-[18px] w-[18px] ${active ? 'text-orange-700' : 'text-slate-400'}`} />
-                      {item.label}
-                    </Link>
-                  );
-                })}
+                {navigation.map((item) => (
+                  <NavigationLink key={item.path} item={item} active={isNavigationActive(location.pathname, item.path)} onClick={() => setMobileNavOpen(false)} />
+                ))}
               </nav>
               <div className="mb-3 mt-8 flex items-center justify-between px-3">
                 <span className="text-[11px] font-semibold uppercase tracking-[0.13em] text-slate-400">Team workspaces</span>

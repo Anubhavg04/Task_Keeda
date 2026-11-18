@@ -530,26 +530,31 @@ const DemoWorkspace = () => {
 
   return (
     <div className="py-6 sm:py-8">
-      <div className="mb-5 flex flex-col items-stretch gap-3 rounded-xl border border-orange-200/80 bg-orange-50/80 p-4 md:flex-row md:items-center md:justify-between md:px-4 md:py-3">
-        <p className="min-w-0 text-sm leading-6 text-orange-950"><span className="font-semibold">You're exploring a demo with sample data.</span> Sign up to create and edit real tasks.</p>
-        <Link to="/register" className="inline-flex min-h-11 shrink-0 items-center justify-center gap-1 rounded-lg px-3 text-sm font-semibold text-orange-800 transition hover:bg-orange-100 hover:text-orange-950 md:min-h-0">Make it yours <LuArrowRight aria-hidden="true" className="h-4 w-4" /></Link>
+      <div role="note" aria-label="Demo workspace" className="mb-6 flex flex-col items-stretch gap-3 rounded-2xl border border-orange-200/80 bg-gradient-to-r from-orange-50 to-white p-3.5 shadow-sm sm:flex-row sm:items-center sm:justify-between sm:px-4 sm:py-3">
+        <div className="flex min-w-0 flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
+          <span className="w-fit rounded-md bg-orange-100 px-2 py-1 text-[10px] font-bold uppercase tracking-[0.12em] text-orange-800">Demo</span>
+          <p className="min-w-0 text-sm leading-6 text-orange-950"><span className="font-semibold">You're exploring a demo with sample data.</span> Sign up to create and edit real tasks.</p>
+        </div>
+        <Link to="/register" className="inline-flex min-h-11 shrink-0 items-center justify-center gap-1 rounded-lg bg-orange-700 px-3 text-sm font-semibold text-white shadow-sm transition hover:bg-orange-800 active:scale-[0.98] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange-700 sm:min-h-10">Make it yours <LuArrowRight aria-hidden="true" className="h-4 w-4" /></Link>
       </div>
 
       <div className="grid items-start gap-6 lg:grid-cols-[205px_minmax(0,1fr)]">
-        <nav aria-label="Explore TaskFlow" className="flex gap-1 overflow-x-auto rounded-xl border border-slate-200/80 bg-white p-2 shadow-sm lg:sticky lg:top-24 lg:flex-col lg:overflow-visible">
-          <p className="hidden px-3 pb-2 pt-1 text-[10px] font-semibold uppercase tracking-[0.15em] text-slate-400 lg:block">Explore workspace</p>
+        <nav aria-label="Explore TaskFlow" className="flex gap-1 overflow-x-auto rounded-2xl border border-slate-200/80 bg-white p-2.5 shadow-sm lg:sticky lg:top-24 lg:flex-col lg:overflow-visible">
+          <p className="hidden px-3 pb-2 pt-1 text-[10px] font-semibold uppercase tracking-[0.15em] text-slate-500 lg:block">Explore workspace</p>
           {navigation.map((item) => {
             const active = activePath === item.path;
             return (
-              <Link key={item.path} to={item.path} aria-current={active ? 'page' : undefined} className={`inline-flex min-h-11 shrink-0 items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm font-medium transition ${active ? 'bg-orange-50 text-orange-900' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'}`}>
-                <item.icon aria-hidden="true" className={`h-[18px] w-[18px] ${active ? 'text-orange-700' : 'text-slate-400'}`} />{item.label}
+              <Link key={item.path} to={item.path} aria-current={active ? 'page' : undefined} className={`group relative inline-flex min-h-11 shrink-0 items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-150 active:scale-[0.99] focus-visible:outline focus-visible:outline-2 focus-visible:outline-orange-700 lg:hover:translate-x-0.5 motion-reduce:transform-none ${active ? 'bg-orange-50 text-orange-950 shadow-sm ring-1 ring-orange-100' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'}`}>
+                <span aria-hidden="true" className={`pointer-events-none absolute inset-x-3 bottom-0 h-[3px] rounded-full bg-orange-700 transition-opacity duration-150 lg:inset-x-auto lg:inset-y-2 lg:left-0 lg:h-auto lg:w-[3px] ${active ? 'opacity-100' : 'opacity-0 group-hover:opacity-25'}`} />
+                <item.icon aria-hidden="true" className={`h-5 w-5 shrink-0 ${active ? 'text-orange-800' : 'text-slate-400 group-hover:text-slate-600'}`} />
+                <span>{item.label}</span>
               </Link>
             );
           })}
-          <div className="mt-2 hidden rounded-xl bg-[#f7f5f0] p-3 lg:block">
+          <div className="mt-3 hidden rounded-xl border border-orange-100 bg-[#fffaf4] p-3 lg:block">
             <p className="text-xs font-semibold text-slate-700">A workspace for your work</p>
             <p className="mt-1 text-xs leading-5 text-slate-500">Tasks, shared projects, notes, and more—together.</p>
-            <Link to="/register" className="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-orange-800">Get started <LuArrowRight aria-hidden="true" className="h-3.5 w-3.5" /></Link>
+            <Link to="/register" className="mt-3 inline-flex min-h-8 items-center gap-1 rounded-md text-xs font-semibold text-orange-800 transition hover:text-orange-950 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange-700">Get started <LuArrowRight aria-hidden="true" className="h-3.5 w-3.5" /></Link>
           </div>
         </nav>
 
