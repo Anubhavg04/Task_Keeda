@@ -9,7 +9,7 @@ import TaskBoard from './TaskBoard.jsx';
 import TaskForm from './TaskForm.jsx';
 import { getTaskStatusVisual } from '../utils/taskVisuals.js';
 import { TaskPriorityIndicator, TaskStatusBadge } from './TaskVisuals.jsx';
-import { EmptyState, ErrorState, PageHeading, TasksListSkeleton, buttonPrimary, inputClass } from './WorkspaceUI.jsx';
+import { EmptyState, ErrorState, metaTextClass, PageHeading, sectionHeadingClass, TasksListSkeleton, taskTitleClass, buttonPrimary, inputClass } from './WorkspaceUI.jsx';
 import { formatDateOnly } from '../utils/dates.js';
 
 const TaskList = () => {
@@ -195,7 +195,7 @@ const TaskList = () => {
   };
 
   return (
-    <div className="space-y-6 py-7 sm:py-9">
+    <div className="space-y-5 py-6 sm:py-8">
       <PageHeading
         eyebrow={projectId && projectId !== 'personal' ? 'Shared project' : 'Stay in control'}
         title={projectId === 'personal' ? 'Personal tasks' : projectId ? projects.find((project) => project._id === projectId)?.name || 'Project tasks' : 'My tasks'}
@@ -208,8 +208,8 @@ const TaskList = () => {
       <section aria-label="Task filters" className="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-sm shadow-slate-200/30 sm:p-5">
         <div className="mb-4 flex items-center justify-between">
           <div>
-            <h2 className="text-sm font-semibold text-slate-800">Find the right work</h2>
-            <p className="mt-1 text-xs text-slate-500">{loading ? 'Updating results...' : `${tasks.length} tasks on this page`}</p>
+            <h2 className={sectionHeadingClass}>Find the right work</h2>
+            <p className={`mt-0.5 ${metaTextClass}`}>{loading ? 'Updating results...' : `${tasks.length} tasks on this page`}</p>
           </div>
           <div className="flex flex-wrap items-center gap-2">
             <div className="inline-flex rounded-lg border border-slate-200 bg-slate-50 p-1" role="group" aria-label="Task view">
@@ -307,7 +307,7 @@ const TaskList = () => {
               onSaved={refreshTasks}
             />
           ) : (
-            <section aria-label="Task list" className="space-y-3">
+            <section aria-label="Task list" className="space-y-2.5">
           <div className="flex flex-col gap-3 rounded-xl border border-slate-200/80 bg-white p-3 shadow-sm sm:flex-row sm:items-center">
             <label className="flex shrink-0 items-center gap-2 px-1 text-xs font-medium text-slate-600">
               <input
@@ -367,11 +367,11 @@ const TaskList = () => {
                   </div>
                   <div className="min-w-0 flex-1">
                     <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1">
-                      <h2 className={`min-w-0 max-w-full truncate text-sm font-semibold tracking-tight sm:text-[15px] ${task.status === 'done' ? 'text-slate-400 line-through' : 'text-slate-900'}`}>{task.title}</h2>
+                      <h2 className={`min-w-0 max-w-full truncate ${taskTitleClass} ${task.status === 'done' ? 'text-slate-400 line-through' : 'text-slate-900'}`}>{task.title}</h2>
                       <TaskStatusBadge status={task.status} />
                       <TaskPriorityIndicator priority={task.priority} />
                     </div>
-                    <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1.5 text-xs text-slate-500">
+                    <div className={`mt-1 flex flex-wrap items-center gap-x-3 gap-y-1.5 ${metaTextClass}`}>
                       <span className="max-w-40 truncate font-medium text-slate-600">{task.project?.name || 'Personal'}</span>
                       <span className="inline-flex items-center gap-1.5" aria-label={task.assignee?.fullname ? `Assigned to ${task.assignee.fullname}` : 'Unassigned'}>
                         <span title={task.assignee?.fullname || 'Unassigned'} className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[9px] font-bold ${task.assignee?.fullname ? 'bg-orange-100 text-orange-800' : 'border border-dashed border-slate-300 bg-slate-50 text-slate-400'}`}>

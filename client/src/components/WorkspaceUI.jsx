@@ -2,15 +2,19 @@ import React from 'react';
 import { LuFolderOpen } from 'react-icons/lu';
 
 export const PageHeading = ({ eyebrow, title, description, action }) => (
-  <div className="mb-7 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+  <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
     <div>
-      {eyebrow && <p className="mb-2 text-xs font-bold uppercase tracking-[0.15em] text-orange-700">{eyebrow}</p>}
-      <h1 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">{title}</h1>
-      {description && <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500 sm:text-base">{description}</p>}
+      {eyebrow && <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-[0.13em] text-orange-700">{eyebrow}</p>}
+      <h1 className="text-2xl font-bold leading-tight tracking-tight text-slate-900 sm:text-3xl">{title}</h1>
+      {description && <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500 sm:text-[15px]">{description}</p>}
     </div>
     {action && <div className="shrink-0">{action}</div>}
   </div>
 );
+
+export const sectionHeadingClass = 'text-base font-semibold leading-6 tracking-tight text-slate-900';
+export const taskTitleClass = 'text-sm font-semibold leading-5 tracking-tight';
+export const metaTextClass = 'text-xs leading-5 text-slate-500';
 
 export const MetricCard = ({ label, value, caption, icon, tone = 'orange' }) => {
   const tones = {
@@ -22,17 +26,17 @@ export const MetricCard = ({ label, value, caption, icon, tone = 'orange' }) => 
   };
 
   return (
-    <article className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm shadow-slate-200/30">
+    <article className="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-sm shadow-slate-200/30 sm:p-5">
       <div className="flex items-start justify-between gap-3">
         <div>
-          <p className="text-sm font-medium text-slate-500">{label}</p>
-          <p className="mt-3 text-3xl font-bold tracking-tight text-slate-900">{value ?? '—'}</p>
+          <p className="text-xs font-medium leading-5 text-slate-500 sm:text-sm">{label}</p>
+          <p className="mt-2 text-3xl font-bold leading-none tracking-tight text-slate-900">{value ?? '—'}</p>
         </div>
         <span className={`flex h-10 w-10 items-center justify-center rounded-xl ${tones[tone]}`}>
           {React.createElement(icon, { 'aria-hidden': true, className: 'h-5 w-5' })}
         </span>
       </div>
-      {caption && <p className="mt-3 text-xs leading-5 text-slate-500">{caption}</p>}
+      {caption && <p className="mt-2 text-xs leading-5 text-slate-500">{caption}</p>}
     </article>
   );
 };
@@ -51,9 +55,9 @@ const SkeletonBlock = ({ className = '' }) => (
 );
 
 export const TasksListSkeleton = () => (
-  <div role="status" aria-label="Loading tasks" className="space-y-3">
+  <div role="status" aria-label="Loading tasks" className="space-y-2.5">
     {Array.from({ length: 4 }, (_, index) => (
-      <div key={index} className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm">
+      <div key={index} className="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-sm">
         <div className="flex gap-4">
           <SkeletonBlock className="h-6 w-6 shrink-0 rounded-full" />
           <div className="min-w-0 flex-1 space-y-3">
@@ -69,9 +73,9 @@ export const TasksListSkeleton = () => (
 );
 
 export const ProjectsCardsSkeleton = () => (
-  <div role="status" aria-label="Loading projects" className="grid gap-5 md:grid-cols-2 2xl:grid-cols-3">
+  <div role="status" aria-label="Loading projects" className="grid gap-4 md:grid-cols-2 2xl:grid-cols-3">
     {Array.from({ length: 3 }, (_, index) => (
-      <div key={index} className="rounded-2xl border border-slate-200/80 border-t-[3px] border-t-orange-300 bg-white p-5 shadow-sm sm:p-6">
+      <div key={index} className="rounded-2xl border border-slate-200/80 border-t-[3px] border-t-orange-300 bg-white p-4 shadow-sm sm:p-5">
         <div className="flex items-start gap-3"><SkeletonBlock className="mt-1 h-3 w-3 rounded-full" /><div className="flex-1 space-y-2"><SkeletonBlock className="h-5 w-3/4" /><SkeletonBlock className="h-5 w-16 rounded-full" /></div></div>
         <SkeletonBlock className="mt-5 h-4 w-full" />
         <SkeletonBlock className="mt-2 h-4 w-4/5" />
@@ -84,9 +88,9 @@ export const ProjectsCardsSkeleton = () => (
 );
 
 export const NotesGridSkeleton = () => (
-  <div role="status" aria-label="Loading notes" className="grid gap-4 md:grid-cols-2 2xl:grid-cols-3">
+  <div role="status" aria-label="Loading notes" className="grid gap-3 md:grid-cols-2 2xl:grid-cols-3">
     {Array.from({ length: 3 }, (_, index) => (
-      <div key={index} className="flex min-h-56 flex-col rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm">
+      <div key={index} className="flex min-h-52 flex-col rounded-2xl border border-slate-200/80 bg-white p-4 shadow-sm">
         <SkeletonBlock className="h-4 w-28" />
         <SkeletonBlock className="mt-5 h-5 w-3/4" />
         <div className="mt-4 flex-1 space-y-2"><SkeletonBlock className="h-4 w-full" /><SkeletonBlock className="h-4 w-full" /><SkeletonBlock className="h-4 w-2/3" /></div>
@@ -98,17 +102,17 @@ export const NotesGridSkeleton = () => (
 );
 
 export const ReportsSkeleton = () => (
-  <div role="status" aria-label="Loading reports" className="space-y-5">
-    <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+  <div role="status" aria-label="Loading reports" className="space-y-4">
+    <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
       {Array.from({ length: 4 }, (_, index) => (
-        <div key={index} className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm">
+        <div key={index} className="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-sm">
           <SkeletonBlock className="h-4 w-24" /><SkeletonBlock className="mt-4 h-9 w-20" /><SkeletonBlock className="mt-4 h-3 w-32" />
         </div>
       ))}
     </div>
-    <div className="grid gap-5 xl:grid-cols-2">
+    <div className="grid gap-4 xl:grid-cols-2">
       {Array.from({ length: 2 }, (_, index) => (
-        <div key={index} className="rounded-2xl border border-slate-200/80 bg-white p-6 shadow-sm">
+        <div key={index} className="rounded-2xl border border-slate-200/80 bg-white p-4 sm:p-5 shadow-sm">
           <SkeletonBlock className="h-5 w-32" /><SkeletonBlock className="mt-2 h-4 w-48" />
           <div className="mt-7 space-y-5">{Array.from({ length: 4 }, (_, row) => <SkeletonBlock key={row} className="h-4 w-full" />)}</div>
         </div>
@@ -133,7 +137,7 @@ export const EmptyState = ({ title, description, action, icon = LuFolderOpen }) 
     <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-orange-50 text-orange-800">
       {React.createElement(icon, { 'aria-hidden': true, className: 'h-6 w-6' })}
     </div>
-    <h2 className="mt-4 text-base font-semibold text-slate-900">{title}</h2>
+    <h2 className={`mt-4 ${sectionHeadingClass}`}>{title}</h2>
     <p className="mx-auto mt-2 max-w-sm text-sm leading-6 text-slate-500">{description}</p>
     {action && <div className="mt-5">{action}</div>}
   </div>

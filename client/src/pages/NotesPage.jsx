@@ -3,7 +3,7 @@ import { useSearchParams } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { LuNotebookPen, LuPlus, LuX } from 'react-icons/lu';
 import { noteAPI, projectAPI } from '../services/api.js';
-import { EmptyState, ErrorState, NotesGridSkeleton, PageHeading, buttonPrimary, inputClass } from '../components/WorkspaceUI.jsx';
+import { EmptyState, ErrorState, metaTextClass, NotesGridSkeleton, PageHeading, sectionHeadingClass, taskTitleClass, buttonPrimary, inputClass } from '../components/WorkspaceUI.jsx';
 
 const blankNote = { title: '', content: '', projectId: '' };
 
@@ -101,7 +101,7 @@ const NotesPage = () => {
   };
 
   return (
-    <div className="py-7 sm:py-9">
+    <div className="py-6 sm:py-8">
       <PageHeading
         eyebrow="Ideas, captured"
         title="Notes"
@@ -109,7 +109,7 @@ const NotesPage = () => {
         action={<button type="button" onClick={startCreate} className={buttonPrimary}><LuPlus aria-hidden="true" className="h-4 w-4" />New note</button>}
       />
 
-      <div className="mb-6 flex flex-col gap-3 rounded-2xl border border-slate-200/80 bg-white p-4 shadow-sm sm:flex-row sm:items-center">
+      <div className="mb-5 flex flex-col gap-3 rounded-2xl border border-slate-200/80 bg-white p-4 shadow-sm sm:flex-row sm:items-center">
         <label className="min-w-0 flex-1">
           <span className="sr-only">Search notes</span>
           <input type="search" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search your notes..." className={inputClass} />
@@ -127,9 +127,9 @@ const NotesPage = () => {
       {error ? null : loading ? <NotesGridSkeleton /> : (
         <>
           {editingId === 'new' && (
-            <form onSubmit={handleSave} className="mb-5 rounded-2xl border border-orange-200 bg-white p-5 shadow-sm sm:p-6">
+            <form onSubmit={handleSave} className="mb-5 rounded-2xl border border-orange-200 bg-white p-4 shadow-sm sm:p-5">
               <div className="mb-4 flex items-center justify-between">
-                <h2 className="font-semibold text-slate-900">New note</h2>
+                <h2 className={sectionHeadingClass}>New note</h2>
                 <button type="button" onClick={() => setEditingId('')} className="rounded px-2 py-1 text-sm text-slate-500 transition hover:bg-slate-100 active:scale-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-orange-600">Cancel</button>
               </div>
               <div className="space-y-3">
@@ -155,9 +155,9 @@ const NotesPage = () => {
           {visibleNotes.length === 0 ? (
             <EmptyState icon={LuNotebookPen} title={search ? 'No matching notes' : 'No notes yet'} description={search ? 'Try another search phrase, or clear the search field.' : 'Write a quick idea, capture a project decision, or save details your team can use later.'} action={!search && <button type="button" onClick={startCreate} className={buttonPrimary}><LuPlus aria-hidden="true" className="h-4 w-4" />Create your first note</button>} />
           ) : (
-            <section aria-label="Notes" className="grid gap-4 md:grid-cols-2 2xl:grid-cols-3">
+            <section aria-label="Notes" className="grid gap-3 md:grid-cols-2 2xl:grid-cols-3">
               {visibleNotes.map((note) => (
-                <article key={note._id} className="flex min-h-56 flex-col rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm shadow-slate-200/30 transition-all duration-200 ease-out hover:-translate-y-0.5 hover:border-orange-200 hover:shadow-md hover:shadow-slate-300/40 focus-within:border-orange-200 motion-reduce:transform-none">
+                <article key={note._id} className="flex min-h-52 flex-col rounded-2xl border border-slate-200/80 bg-white p-4 shadow-sm shadow-slate-200/30 transition-all duration-200 ease-out hover:-translate-y-0.5 hover:border-orange-200 hover:shadow-md hover:shadow-slate-300/40 focus-within:border-orange-200 motion-reduce:transform-none sm:p-5">
                   {editingId === note._id ? (
                     <form onSubmit={handleSave} className="flex flex-1 flex-col gap-3">
                       <label className="text-sm font-medium text-slate-700">Title
@@ -175,14 +175,14 @@ const NotesPage = () => {
                     <>
                       <div className="flex items-start justify-between gap-3">
                         <div className="min-w-0">
-                          <h2 className="truncate font-semibold text-slate-900">{note.title}</h2>
+                          <h2 className={`${taskTitleClass} truncate text-slate-900`}>{note.title}</h2>
                           <span className={`mt-2 inline-flex rounded-full px-2 py-1 text-[10px] font-semibold ${note.project ? 'bg-orange-50 text-orange-700' : 'bg-slate-100 text-slate-600'}`}>{note.project?.name || 'Personal'}</span>
                         </div>
                         <button type="button" onClick={() => handleDelete(note)} aria-label={`Delete ${note.title}`} className="shrink-0 rounded-lg p-2 text-slate-400 transition hover:bg-rose-50 hover:text-rose-600 active:scale-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-orange-600"><LuX aria-hidden="true" className="h-4 w-4" /></button>
                       </div>
-                      <p className="mt-4 flex-1 whitespace-pre-wrap break-words text-sm leading-6 text-slate-600">{note.content || 'No note content yet.'}</p>
+                      <p className="mt-3 flex-1 whitespace-pre-wrap break-words text-sm leading-6 text-slate-600">{note.content || 'No note content yet.'}</p>
                       <div className="mt-4 flex items-center justify-between border-t border-slate-100 pt-3">
-                        <span className="text-xs text-slate-400">Edited {new Date(note.updatedAt).toLocaleDateString()}</span>
+                        <span className={`${metaTextClass} text-slate-400`}>Edited {new Date(note.updatedAt).toLocaleDateString()}</span>
                         <button type="button" onClick={() => startEdit(note)} className="rounded-lg px-3 py-1.5 text-xs font-semibold text-orange-700 transition hover:bg-orange-50 active:scale-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-orange-600">Edit</button>
                       </div>
                     </>

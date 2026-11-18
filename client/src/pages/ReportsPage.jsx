@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { LuArrowDownToLine, LuBriefcaseBusiness, LuCircleAlert, LuCircleCheck, LuTrendingUp } from 'react-icons/lu';
 import toast from 'react-hot-toast';
 import { taskAPI } from '../services/api.js';
-import { ErrorState, MetricCard, PageHeading, ReportsSkeleton, buttonSecondary } from '../components/WorkspaceUI.jsx';
+import { ErrorState, MetricCard, PageHeading, ReportsSkeleton, sectionHeadingClass, buttonSecondary } from '../components/WorkspaceUI.jsx';
 import { getTaskPriorityVisual, getTaskStatusVisual, taskPriorityOrder } from '../utils/taskVisuals.js';
 import { TaskPriorityIndicator, TaskStatusBadge } from '../components/TaskVisuals.jsx';
 import { formatDateOnly } from '../utils/dates.js';
@@ -83,7 +83,7 @@ const ReportsPage = () => {
   const projectRows = summary?.byProject || [];
 
   return (
-    <div className="space-y-7 py-7 sm:py-9">
+    <div className="space-y-6 py-6 sm:py-8">
       <PageHeading
         eyebrow="Measure what moves"
         title="Reports"
@@ -94,18 +94,18 @@ const ReportsPage = () => {
       {error && <ErrorState message={error} onRetry={loadReport} />}
       {error ? null : loading ? <ReportsSkeleton /> : (
         <>
-          <section aria-label="Task report summary" className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          <section aria-label="Task report summary" className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
             <MetricCard label="Total tasks" value={summary?.total || 0} caption={`${summary?.projects || 0} shared projects`} icon={LuBriefcaseBusiness} tone="orange" />
             <MetricCard label="Completion rate" value={`${completionRate}%`} caption={`${summary?.done || 0} tasks completed`} icon={LuCircleCheck} tone="emerald" />
             <MetricCard label="Needs attention" value={(summary?.overdue || 0) + (summary?.dueToday || 0)} caption={`${summary?.overdue || 0} overdue · ${summary?.dueToday || 0} due today`} icon={LuCircleAlert} tone="rose" />
             <MetricCard label="This week's wins" value={summary?.completedThisWeek || 0} caption="Tasks completed since Monday" icon={LuTrendingUp} tone="blue" />
           </section>
 
-          <section className="grid gap-5 xl:grid-cols-2">
-            <article className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm shadow-slate-200/30 sm:p-6">
-              <div className="mb-6">
-                <h2 className="font-semibold text-slate-900">Task status</h2>
-                <p className="mt-1 text-sm text-slate-500">How work is distributed right now</p>
+          <section className="grid gap-4 xl:grid-cols-2">
+            <article className="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-sm shadow-slate-200/30 sm:p-5">
+              <div className="mb-4">
+                <h2 className={sectionHeadingClass}>Task status</h2>
+                <p className="mt-1 text-sm leading-6 text-slate-500">How work is distributed right now</p>
               </div>
               <div className="mb-6 flex h-3 overflow-hidden rounded-full bg-slate-100" role="img" aria-label={`${summary?.todo || 0} to do, ${summary?.inProgress || 0} in progress, ${summary?.done || 0} completed`}>
                 {[
@@ -132,12 +132,12 @@ const ReportsPage = () => {
               </div>
             </article>
 
-            <article className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm shadow-slate-200/30 sm:p-6">
-              <div className="mb-6">
-                <h2 className="font-semibold text-slate-900">Open work by priority</h2>
-                <p className="mt-1 text-sm text-slate-500">Use priority to focus the team's attention</p>
+            <article className="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-sm shadow-slate-200/30 sm:p-5">
+              <div className="mb-4">
+                <h2 className={sectionHeadingClass}>Open work by priority</h2>
+                <p className="mt-1 text-sm leading-6 text-slate-500">Use priority to focus the team's attention</p>
               </div>
-              <div className="space-y-5">
+              <div className="space-y-4">
                 {taskPriorityOrder.map((priority) => (
                   <div key={priority}>
                     <div className="mb-2 flex items-center justify-between">
@@ -153,10 +153,10 @@ const ReportsPage = () => {
             </article>
           </section>
 
-          <article className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm shadow-slate-200/30 sm:p-6">
-            <div className="mb-5">
-              <h2 className="font-semibold text-slate-900">Work by project</h2>
-              <p className="mt-1 text-sm text-slate-500">Progress across your busiest spaces</p>
+          <article className="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-sm shadow-slate-200/30 sm:p-5">
+            <div className="mb-4">
+              <h2 className={sectionHeadingClass}>Work by project</h2>
+              <p className="mt-1 text-sm leading-6 text-slate-500">Progress across your busiest spaces</p>
             </div>
             {projectRows.length ? (
               <div className="overflow-x-auto">
@@ -174,10 +174,10 @@ const ReportsPage = () => {
                       const rate = project.total ? Math.round((project.done / project.total) * 100) : 0;
                       return (
                         <tr key={project.name}>
-                          <th scope="row" className="py-4 pr-4 font-medium text-slate-800">{project.name}</th>
-                          <td className="py-4 pr-4 text-slate-600">{project.total}</td>
-                          <td className="py-4 pr-4 text-slate-600">{project.done}</td>
-                          <td className="py-4">
+                          <th scope="row" className="py-3 pr-4 font-medium leading-5 text-slate-800">{project.name}</th>
+                          <td className="py-3 pr-4 leading-5 text-slate-600">{project.total}</td>
+                          <td className="py-3 pr-4 leading-5 text-slate-600">{project.done}</td>
+                          <td className="py-3">
                             <div className="flex items-center gap-3">
                               <div className="h-2 min-w-16 flex-1 overflow-hidden rounded-full bg-slate-100">
                                 <div className="h-full rounded-full bg-orange-500" style={{ width: `${rate}%` }} />
