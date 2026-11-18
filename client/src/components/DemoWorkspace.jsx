@@ -150,6 +150,7 @@ const FocusSprint = () => {
   const progress = ((duration * 60 - secondsRemaining) / (duration * 60)) * 100;
   const sprintComplete = secondsRemaining === 0;
   const sprintRunning = running && secondsRemaining > 0;
+  const sprintPaused = !running && secondsRemaining < duration * 60 && secondsRemaining > 0;
 
   const toggleSprint = () => {
     if (sprintRunning) {
@@ -159,6 +160,11 @@ const FocusSprint = () => {
     if (secondsRemaining === 0) setSecondsRemaining(duration * 60);
     setRunning(true);
   };
+  const sprintActionLabel = sprintComplete
+    ? 'Restart focus sprint'
+    : secondsRemaining < duration * 60
+      ? 'Resume focus sprint'
+      : 'Start focus sprint';
 
   return (
     <article className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm shadow-slate-200/20">
@@ -177,11 +183,11 @@ const FocusSprint = () => {
       </label>
       <div className="mt-5 flex items-center justify-between gap-3">
         <div aria-live="polite">
-          <p className="font-mono text-4xl font-semibold tracking-tight text-slate-900">{minutes}:{seconds}</p>
-          <p className="mt-1 text-xs text-slate-500">{sprintComplete ? 'Sprint complete. Nice work.' : sprintRunning ? 'One thing at a time.' : 'Pick a pace and get started.'}</p>
+          <p className={`font-mono text-4xl font-semibold tracking-tight transition-colors duration-300 ${sprintComplete ? 'text-emerald-700' : 'text-slate-900'}`}>{minutes}:{seconds}</p>
+          <p className="mt-1 text-xs text-slate-500">{sprintComplete ? 'Sprint complete. Nice work.' : sprintRunning ? 'One thing at a time.' : sprintPaused ? "Paused. Resume when you're ready." : 'Pick a pace and get started.'}</p>
         </div>
         <div className="flex items-center gap-2">
-          <button type="button" onClick={toggleSprint} aria-label={sprintRunning ? 'Pause focus sprint' : 'Start focus sprint'} className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-orange-700 text-white transition hover:bg-orange-800">
+          <button type="button" onClick={toggleSprint} aria-label={sprintRunning ? 'Pause focus sprint' : sprintActionLabel} className={`inline-flex h-10 w-10 items-center justify-center rounded-xl text-white transition-all duration-300 ease-in-out active:scale-95 ${sprintRunning ? 'bg-orange-800 hover:bg-orange-900' : 'bg-orange-700 hover:bg-orange-800'}`}>
             {sprintRunning ? <LuPause aria-hidden="true" className="h-4 w-4" /> : <LuPlay aria-hidden="true" className="h-4 w-4" />}
           </button>
           <button type="button" onClick={() => { setSecondsRemaining(duration * 60); setRunning(false); }} aria-label="Reset focus sprint" className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 text-slate-500 transition hover:bg-slate-50">
@@ -189,10 +195,10 @@ const FocusSprint = () => {
           </button>
         </div>
       </div>
-      <div className="mt-4 h-1.5 overflow-hidden rounded-full bg-slate-100"><div className="h-full rounded-full bg-orange-600 transition-[width] duration-500" style={{ width: `${progress}%` }} /></div>
+      <div className="mt-4 h-1.5 overflow-hidden rounded-full bg-slate-100"><div className={`h-full rounded-full transition-[width,background-color] duration-500 ${sprintComplete ? 'bg-emerald-600' : 'bg-orange-600'}`} style={{ width: `${progress}%` }} /></div>
       <div className="mt-3 flex items-center gap-2" aria-label="Focus sprint length">
         {[15, 25, 45].map((option) => (
-          <button type="button" key={option} onClick={() => setSprintDuration(option)} disabled={running} aria-pressed={duration === option} className={`rounded-full px-3 py-1.5 text-xs font-semibold transition disabled:cursor-not-allowed disabled:opacity-50 ${duration === option ? 'bg-orange-50 text-orange-800' : 'text-slate-400 hover:bg-slate-50 hover:text-slate-700'}`}>{option} min</button>
+          <button type="button" key={option} onClick={() => setSprintDuration(option)} aria-pressed={duration === option} className={`rounded-full px-3 py-1.5 text-xs font-semibold transition-colors duration-300 ${duration === option ? 'bg-orange-50 text-orange-800' : 'text-slate-400 hover:bg-slate-50 hover:text-slate-700'}`}>{option} min</button>
         ))}
         <Link to="/register" className="ml-auto text-[11px] font-semibold text-orange-800 hover:text-orange-950">Save your progress</Link>
       </div>
