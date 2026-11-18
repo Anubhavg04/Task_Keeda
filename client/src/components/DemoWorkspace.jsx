@@ -21,6 +21,7 @@ import {
   LuRotateCcw,
   LuTarget,
   LuUsersRound,
+  LuX,
 } from 'react-icons/lu';
 
 const navigation = [
@@ -334,44 +335,104 @@ const NotesView = () => {
 };
 
 const CalendarView = () => {
-  const [month, setMonth] = useState(() => new Date(new Date().getFullYear(), new Date().getMonth(), 1));
-  const days = useMemo(() => {
-    const first = new Date(month.getFullYear(), month.getMonth(), 1);
+  const [activeDate, setActiveDate] = useState(() => new Date());
+  const [view, setView] = useState('month');
+  const [selectedTaskTitle, setSelectedTaskTitle] = useState('');
+  const start = useMemo(() => {
+    const first = view === 'month'
+      ? new Date(activeDate.getFullYear(), activeDate.getMonth(), 1)
+      : new Date(activeDate);
     first.setDate(first.getDate() - first.getDay());
-    return Array.from({ length: 42 }, (_, index) => {
-      const date = new Date(first);
-      date.setDate(first.getDate() + index);
+    return first;
+  }, [activeDate, view]);
+  const days = useMemo(() => Array.from({ length: view === 'month' ? 42 : 7 }, (_, index) => {
+      const date = new Date(start);
+      date.setDate(start.getDate() + index);
       return date;
-    });
-  }, [month]);
-  const monthLabel = month.toLocaleDateString(undefined, { month: 'long', year: 'numeric' });
+    }), [start, view]);
+  const selectedTask = demoTasks.find((task) => task.title === selectedTaskTitle);
+  const movePeriod = (amount) => {
+    setSelectedTaskTitle('');
+    setActiveDate((date) => view === 'month'
+      ? new Date(date.getFullYear(), date.getMonth() + amount, 1)
+      : new Date(date.getFullYear(), date.getMonth(), date.getDate() + amount * 7));
+  };
+  const monthLabel = activeDate.toLocaleDateString(undefined, { month: 'long', year: 'numeric' });
+  const weekLabel = `${days[0]?.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })} – ${days[6]?.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}`;
+  const toggleTaskDetails = (title) => setSelectedTaskTitle((current) => current === title ? '' : title);
+  const statusTone = (status) => status === 'Done'
+    ? 'border-emerald-200 bg-emerald-50 text-emerald-800'
+    : status === 'In progress'
+      ? 'border-amber-200 bg-amber-50 text-amber-800'
+      : 'border-slate-200 bg-slate-50 text-slate-700';
 
   return (
     <div className="space-y-5">
       <section className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm">
-        <div className="flex items-center justify-between gap-3 border-b border-slate-100 px-4 py-4 sm:px-5">
-          <div><h2 className="font-semibold text-slate-900">{monthLabel}</h2><p className="mt-1 text-xs text-slate-500">Sample deadlines from across the workspace</p></div>
-          <div className="flex gap-2">
-            <button type="button" aria-label="Previous month" onClick={() => setMonth((date) => new Date(date.getFullYear(), date.getMonth() - 1, 1))} className="rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-600 hover:bg-slate-50"><LuChevronLeft aria-hidden="true" className="h-4 w-4" /></button>
-            <button type="button" aria-label="Next month" onClick={() => setMonth((date) => new Date(date.getFullYear(), date.getMonth() + 1, 1))} className="rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-600 hover:bg-slate-50"><LuChevronRight aria-hidden="true" className="h-4 w-4" /></button>
+        <div className="space-y-3 border-b border-slate-100 px-4 py-4 sm:px-5">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <h2 className="font-semibold text-slate-900">{view === 'month' ? monthLabel : weekLabel}</h2>
+              <p className="mt-1 text-xs text-slate-500">Sample deadlines from across the workspace</p>
+            </div>
+            <div className="inline-flex rounded-lg border border-slate-200 bg-slate-50 p-1" role="group" aria-label="Calendar view">
+              {['month', 'week'].map((option) => <button key={option} type="button" aria-pressed={view === option} onClick={() => { setView(option); setSelectedTaskTitle(''); }} className={`min-h-9 rounded-md px-3 text-xs font-semibold capitalize transition ${view === option ? 'bg-white text-orange-800 shadow-sm' : 'text-slate-500 hover:text-slate-800'}`}>{option}</button>)}
+            </div>
+          </div>
+          <div className="flex items-center justify-end gap-2">
+            <button type="button" aria-label="Previous period" onClick={() => movePeriod(-1)} className="inline-flex h-11 w-11 items-center justify-center rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50"><LuChevronLeft aria-hidden="true" className="h-4 w-4" /></button>
+            <button type="button" aria-label="Next period" onClick={() => movePeriod(1)} className="inline-flex h-11 w-11 items-center justify-center rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50"><LuChevronRight aria-hidden="true" className="h-4 w-4" /></button>
           </div>
         </div>
-        <div className="grid grid-cols-7 border-b border-slate-100 bg-slate-50/70">{['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) => <div key={day} className="py-2.5 text-center text-[10px] font-semibold uppercase tracking-wider text-slate-400 sm:text-xs">{day}</div>)}</div>
-        <div className="grid grid-cols-7">
-          {days.map((day) => {
-            const tasks = demoTasks.filter((task) => task.due.toDateString() === day.toDateString());
-            const isCurrentMonth = day.getMonth() === month.getMonth();
-            const isToday = day.toDateString() === new Date().toDateString();
-            return (
-              <div key={day.toISOString()} className={`min-h-[76px] border-b border-r border-slate-100 p-1.5 sm:min-h-24 sm:p-2 ${isCurrentMonth ? 'bg-white' : 'bg-slate-50/60'}`}>
-                <span className={`flex h-6 w-6 items-center justify-center rounded-full text-[11px] ${isToday ? 'bg-orange-700 font-bold text-white' : isCurrentMonth ? 'text-slate-600' : 'text-slate-300'}`}>{day.getDate()}</span>
-                {tasks.slice(0, 1).map((task) => <p key={task.title} title={task.title} className={`mt-1 truncate rounded bg-orange-50 px-1 py-1 text-[9px] font-medium text-orange-800 sm:text-[10px]`}>{task.title}</p>)}
-                {tasks.length > 1 && <p className="mt-1 text-[9px] text-slate-400">+{tasks.length - 1} more</p>}
-              </div>
-            );
-          })}
-        </div>
+        {view === 'month' ? (
+          <>
+            <div className="grid grid-cols-7 border-b border-slate-100 bg-slate-50/70">{['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) => <div key={day} className="py-2.5 text-center text-[10px] font-semibold uppercase tracking-wider text-slate-400 sm:text-xs">{day}</div>)}</div>
+            <div className="grid grid-cols-7">
+              {days.map((day) => {
+                const tasks = demoTasks.filter((task) => task.due.toDateString() === day.toDateString());
+                const isCurrentMonth = day.getMonth() === activeDate.getMonth();
+                const isToday = day.toDateString() === new Date().toDateString();
+                return (
+                  <div key={day.toISOString()} className={`min-h-[76px] border-b border-r border-slate-100 p-1.5 sm:min-h-24 sm:p-2 ${isCurrentMonth ? 'bg-white' : 'bg-slate-50/60'}`}>
+                    <span className={`flex h-6 w-6 items-center justify-center rounded-full text-[11px] ${isToday ? 'bg-orange-700 font-bold text-white' : isCurrentMonth ? 'text-slate-600' : 'text-slate-300'}`}>{day.getDate()}</span>
+                    {tasks.slice(0, 2).map((task) => <button key={task.title} type="button" aria-haspopup="dialog" aria-expanded={selectedTaskTitle === task.title} onClick={() => toggleTaskDetails(task.title)} title={task.title} className="mt-1 block min-h-9 w-full truncate rounded border border-slate-200 bg-orange-50 px-1 py-1 text-left text-[9px] font-medium text-orange-800 sm:text-[10px]">{task.title}</button>)}
+                    {tasks.length > 2 && <p className="mt-1 text-[9px] text-slate-400">+{tasks.length - 2} more</p>}
+                  </div>
+                );
+              })}
+            </div>
+          </>
+        ) : (
+          <div className="divide-y divide-slate-100">
+            {days.map((day) => {
+              const tasks = demoTasks.filter((task) => task.due.toDateString() === day.toDateString());
+              const isToday = day.toDateString() === new Date().toDateString();
+              return (
+                <section key={day.toISOString()} className={`grid gap-3 p-4 sm:grid-cols-[140px_minmax(0,1fr)] sm:gap-5 sm:px-5 ${isToday ? 'bg-orange-50/40' : 'bg-white'}`}>
+                  <div className="flex items-center gap-2 sm:block">
+                    <span className={`text-sm font-semibold ${isToday ? 'text-orange-800' : 'text-slate-800'}`}>{day.toLocaleDateString(undefined, { weekday: 'long' })}</span>
+                    <span className="text-xs text-slate-500">{dateLabel(day, { month: 'short', day: 'numeric' })}</span>
+                    {isToday && <span className="rounded-full bg-orange-100 px-2 py-0.5 text-[10px] font-semibold text-orange-800 sm:mt-2 sm:block sm:w-fit">Today</span>}
+                  </div>
+                  {tasks.length ? <div className="space-y-2">{tasks.map((task) => <button key={task.title} type="button" aria-haspopup="dialog" aria-expanded={selectedTaskTitle === task.title} onClick={() => toggleTaskDetails(task.title)} className={`flex min-h-11 w-full items-center justify-between gap-3 rounded-xl border px-3 py-2 text-left text-sm ${statusTone(task.status)}`}><span className="min-w-0 truncate font-medium">{task.title}</span><span className="shrink-0 text-xs">{task.status}</span></button>)}</div> : <p className="py-1 text-sm text-slate-400">No tasks due</p>}
+                </section>
+              );
+            })}
+          </div>
+        )}
       </section>
+      {selectedTask && (
+        <div role="dialog" aria-label={`${selectedTask.title} task details`} className="fixed inset-x-4 bottom-4 z-50 mx-auto max-w-sm rounded-2xl border border-slate-200 bg-white p-5 shadow-xl shadow-slate-900/15">
+          <div className="flex items-start gap-3">
+            <div className="min-w-0 flex-1"><h2 className="font-semibold text-slate-900">{selectedTask.title}</h2><p className="mt-1 text-xs text-slate-500">{selectedTask.project}</p></div>
+            <button type="button" onClick={() => setSelectedTaskTitle('')} aria-label="Close task details" className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-lg text-slate-500 transition hover:bg-slate-100 hover:text-slate-800"><LuX aria-hidden="true" className="h-4 w-4" /></button>
+          </div>
+          <div className="mt-3 flex flex-wrap items-center justify-between gap-3 border-t border-slate-100 pt-3">
+            <span className={`rounded-full border px-2.5 py-1 text-xs font-medium ${statusTone(selectedTask.status)}`}>{selectedTask.status}</span>
+            <span className="text-xs text-slate-500">Due {dateLabel(selectedTask.due, { month: 'long', day: 'numeric', year: 'numeric' })}</span>
+          </div>
+        </div>
+      )}
       <JoinCard title="Keep every deadline in view." description="Sign up to plan your personal and shared project work in one calendar." />
     </div>
   );
