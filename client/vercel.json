@@ -3,6 +3,10 @@
     {
       "source": "/api/:path*",
       "destination": "https://taskflow-api-4iay.onrender.com/api/:path*"
+    },
+    {
+      "source" : "/(.*)",
+      "destination" : "/index.html"
     }
   ]
 }
