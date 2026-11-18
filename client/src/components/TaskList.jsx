@@ -5,6 +5,7 @@ import { LuCalendarDays, LuCircleAlert, LuCheck, LuEllipsis, LuGitBranch, LuList
 import { useTasks } from '../hooks/useTasks.js';
 import { projectAPI } from '../services/api.js';
 import DiscussionThread from './DiscussionThread.jsx';
+import TaskBoard from './TaskBoard.jsx';
 import TaskForm from './TaskForm.jsx';
 import { getTaskStatusVisual } from '../utils/taskVisuals.js';
 import { TaskPriorityIndicator, TaskStatusBadge } from './TaskVisuals.jsx';
@@ -28,6 +29,7 @@ const TaskList = () => {
   const [selectedTaskIds, setSelectedTaskIds] = useState([]);
   const [bulkStatus, setBulkStatus] = useState('');
   const [bulkPriority, setBulkPriority] = useState('');
+  const [viewMode, setViewMode] = useState('list');
   const [page, setPage] = useState(1);
   const selectPageRef = useRef(null);
   const search = searchParams.get('search') || '';
@@ -70,6 +72,15 @@ const TaskList = () => {
     setPage(1);
     setSelectedTaskIds([]);
     setFilters((current) => ({ ...current, [name]: value }));
+  };
+
+  const handleViewChange = (nextView) => {
+    setViewMode(nextView);
+    setSelectedTaskIds([]);
+    if (nextView === 'board') {
+      setPage(1);
+      setFilters((current) => ({ ...current, status: '' }));
+    }
   };
 
   const handleSearchChange = (event) => {
@@ -184,12 +195,27 @@ const TaskList = () => {
             <h2 className="text-sm font-semibold text-slate-800">Find the right work</h2>
             <p className="mt-1 text-xs text-slate-500">{loading ? 'Updating results...' : `${tasks.length} tasks on this page`}</p>
           </div>
-          <button type="button" onClick={() => {
-            setFilters({ status: '', priority: '', sort: 'createdAt', order: 'desc' });
-            setPage(1);
-            setSelectedTaskIds([]);
-            setSearchParams({}, { replace: true });
-          }} className="inline-flex min-h-11 items-center px-2 text-xs font-medium text-orange-700 hover:text-orange-800 md:min-h-0 md:px-0">Clear filters</button>
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="inline-flex rounded-lg border border-slate-200 bg-slate-50 p-1" role="group" aria-label="Task view">
+              {['list', 'board'].map((option) => (
+                <button
+                  key={option}
+                  type="button"
+                  aria-pressed={viewMode === option}
+                  onClick={() => handleViewChange(option)}
+                  className={`min-h-9 rounded-md px-3 text-xs font-semibold capitalize transition ${viewMode === option ? 'bg-white text-orange-800 shadow-sm' : 'text-slate-500 hover:text-slate-800'}`}
+                >
+                  {option === 'list' ? 'List' : 'Board'}
+                </button>
+              ))}
+            </div>
+            <button type="button" onClick={() => {
+              setFilters({ status: '', priority: '', sort: 'createdAt', order: 'desc' });
+              setPage(1);
+              setSelectedTaskIds([]);
+              setSearchParams({}, { replace: true });
+            }} className="inline-flex min-h-11 items-center px-2 text-xs font-medium text-orange-700 hover:text-orange-800 md:min-h-0 md:px-0">Clear filters</button>
+          </div>
         </div>
         <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-7">
           <label className="text-xs font-semibold text-slate-600 xl:col-span-2">Search
@@ -210,7 +236,7 @@ const TaskList = () => {
             </select>
           </label>
           <label className="text-xs font-semibold text-slate-600">Status
-            <select name="status" value={filters.status} onChange={handleFilterChange} className={`${inputClass} mt-1.5 font-normal`}>
+            <select name="status" value={filters.status} onChange={handleFilterChange} disabled={viewMode === 'board'} className={`${inputClass} mt-1.5 font-normal disabled:cursor-not-allowed disabled:opacity-60`}>
               <option value="">All statuses</option>
               <option value="todo">To do</option>
               <option value="in-progress">In progress</option>
@@ -253,7 +279,18 @@ const TaskList = () => {
           action={<button type="button" onClick={() => setCreateFormOpen(true)} className={buttonPrimary}><LuPlus aria-hidden="true" className="h-4 w-4" />{hasTaskFilters ? 'Create a task' : 'Create your first task'}</button>}
         />
       ) : (
-        <section aria-label="Task list" className="space-y-3">
+        <>
+          {viewMode === 'board' ? (
+            <TaskBoard
+              tasks={tasks}
+              onStatusChange={handleStatusChange}
+              editingTask={editingTask}
+              onEdit={setEditingTask}
+              onCloseEdit={() => setEditingTask(null)}
+              onSaved={refreshTasks}
+            />
+          ) : (
+            <section aria-label="Task list" className="space-y-3">
           <div className="flex flex-col gap-3 rounded-xl border border-slate-200/80 bg-white p-3 shadow-sm sm:flex-row sm:items-center">
             <label className="flex shrink-0 items-center gap-2 px-1 text-xs font-medium text-slate-600">
               <input
@@ -407,6 +444,8 @@ const TaskList = () => {
               )}
             </article>
           ))}
+            </section>
+          )}
           {pagination.totalPages > 1 && (
             <nav aria-label="Task pages" className="flex items-center justify-between rounded-xl border border-slate-200 bg-white px-4 py-3">
               <p className="text-xs text-slate-500">
@@ -419,7 +458,7 @@ const TaskList = () => {
               </div>
             </nav>
           )}
-        </section>
+        </>
       )}
     </div>
   );
