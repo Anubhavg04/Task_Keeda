@@ -1,6 +1,14 @@
 import React, { useReducer, useEffect, useCallback } from 'react';
-import { authAPI, userAPI } from '../services/api.js';
+import {
+  authAPI,
+  cacheUserSession,
+  clearCachedUserSession,
+  getCachedUserSession,
+  userAPI,
+} from '../services/api.js';
 import { AuthContext } from './authContextValue.js';
+
+let sessionCheckPromise = null;
 
 const authReducer = (state, action) => {
   switch (action.type) {
@@ -37,6 +45,7 @@ export const AuthProvider = ({ children }) => {
     try {
       dispatch({ type: 'LOGIN_START' });
       const response = await authAPI.login({ email, password });
+      cacheUserSession(response.data.user);
       dispatch({ type: 'LOGIN_SUCCESS', payload: response.data.user });
       return response.data;
     } catch (error) {
@@ -62,6 +71,7 @@ export const AuthProvider = ({ children }) => {
   const logout = async () => {
     try {
       await authAPI.logout();
+      clearCachedUserSession();
       dispatch({ type: 'LOGOUT' });
     } catch (error) {
       console.error('Logout error:', error);
@@ -70,24 +80,45 @@ export const AuthProvider = ({ children }) => {
   };
 
   const checkAuth = useCallback(async () => {
-    try {
-      const response = await userAPI.getUser();
-      if (response.data.user) {
-        dispatch({ type: 'LOGIN_SUCCESS', payload: response.data.user });
-      } else {
-        dispatch({ type: 'LOGOUT' });
-      }
-    } catch (error) {
-      if (error.response?.status !== 401) {
-        console.error('Session check failed:', error);
-      }
-      dispatch({ type: 'LOGOUT' });
+    const cachedUser = getCachedUserSession();
+    if (cachedUser) {
+      dispatch({ type: 'LOGIN_SUCCESS', payload: cachedUser });
+      return;
     }
+
+    if (sessionCheckPromise) return sessionCheckPromise;
+    sessionCheckPromise = (async () => {
+      try {
+        const response = await userAPI.getUser();
+        if (response.data.user) {
+          cacheUserSession(response.data.user);
+          dispatch({ type: 'LOGIN_SUCCESS', payload: response.data.user });
+        } else {
+          clearCachedUserSession();
+          dispatch({ type: 'LOGOUT' });
+        }
+      } catch (error) {
+        if (error.response?.status !== 401) {
+          console.error('Session check failed:', error);
+        }
+        clearCachedUserSession();
+        dispatch({ type: 'LOGOUT' });
+      } finally {
+        sessionCheckPromise = null;
+      }
+    })();
+    return sessionCheckPromise;
   }, []);
 
   useEffect(() => {
     checkAuth();
   }, [checkAuth]);
+
+  useEffect(() => {
+    const handleUnauthorized = () => dispatch({ type: 'LOGOUT' });
+    window.addEventListener('taskflow:auth-unauthorized', handleUnauthorized);
+    return () => window.removeEventListener('taskflow:auth-unauthorized', handleUnauthorized);
+  }, []);
 
   const value = {
     ...state,
