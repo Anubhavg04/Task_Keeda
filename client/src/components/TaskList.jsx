@@ -184,7 +184,7 @@ const TaskList = () => {
         eyebrow={projectId && projectId !== 'personal' ? 'Shared project' : 'Stay in control'}
         title={projectId === 'personal' ? 'Personal tasks' : projectId ? projects.find((project) => project._id === projectId)?.name || 'Project tasks' : 'My tasks'}
         description="Plan the work, set priorities, and keep everyone moving in the same direction."
-        action={<button type="button" onClick={() => showCreateForm ? closeCreateForm() : setCreateFormOpen(true)} className={buttonPrimary}>{showCreateForm ? 'Close form' : <><LuPlus aria-hidden="true" className="h-4 w-4" />Create task</>}</button>}
+        action={<button type="button" onClick={() => showCreateForm ? closeCreateForm() : setCreateFormOpen(true)} className={`${buttonPrimary} min-h-11 w-full md:w-auto`}>{showCreateForm ? 'Close form' : <><LuPlus aria-hidden="true" className="h-4 w-4" />Create task</>}</button>}
       />
 
       {showCreateForm && <TaskForm onClose={closeCreateForm} onSaved={refreshTasks} defaultProjectId={projectId === 'personal' ? '' : projectId} />}
@@ -200,7 +200,7 @@ const TaskList = () => {
             setPage(1);
             setSelectedTaskIds([]);
             setSearchParams({}, { replace: true });
-          }} className="text-xs font-medium text-orange-700 hover:text-orange-800">Clear filters</button>
+          }} className="inline-flex min-h-11 items-center px-2 text-xs font-medium text-orange-700 hover:text-orange-800 md:min-h-0 md:px-0">Clear filters</button>
         </div>
         <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-7">
           <label className="text-xs font-semibold text-slate-600 xl:col-span-2">Search
@@ -277,7 +277,7 @@ const TaskList = () => {
               />
               Select page
             </label>
-            <span className="text-xs text-slate-500">{selectedTaskIds.length} selected across pages</span>
+            <span className="inline-flex min-h-11 items-center text-xs text-slate-500 md:min-h-0">{selectedTaskIds.length} selected across pages</span>
             {selectedTaskIds.length > 0 && (
               <div className="flex flex-1 flex-wrap items-center gap-2 sm:justify-end">
                 <label className="sr-only" htmlFor="bulk-status">Set selected task status</label>
@@ -298,35 +298,39 @@ const TaskList = () => {
                 <button type="button" onClick={handleBulkUpdate} disabled={loading || (!bulkStatus && !bulkPriority)} className="inline-flex items-center gap-1.5 rounded-lg bg-orange-700 px-3 py-2 text-xs font-semibold text-white transition hover:bg-orange-800 disabled:cursor-not-allowed disabled:opacity-50">
                   <LuListChecks aria-hidden="true" className="h-4 w-4" />Apply
                 </button>
-                <button type="button" onClick={() => setSelectedTaskIds([])} className="inline-flex items-center gap-1 rounded-lg px-2 py-2 text-xs font-medium text-slate-500 hover:bg-slate-100 hover:text-slate-800">
+                <button type="button" onClick={() => setSelectedTaskIds([])} className="inline-flex min-h-11 items-center gap-1 rounded-lg px-2 py-2 text-xs font-medium text-slate-500 hover:bg-slate-100 hover:text-slate-800 md:min-h-0">
                   <LuX aria-hidden="true" className="h-4 w-4" />Clear
                 </button>
               </div>
             )}
           </div>
           {tasks.map((task) => (
-            <article key={task._id} className="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-sm shadow-slate-200/20 transition hover:border-slate-300 hover:shadow-md sm:p-5">
+            <article key={task._id} className="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-sm shadow-slate-200/20 transition hover:border-slate-300 hover:shadow-md md:p-5">
               {editingTask?._id === task._id ? (
                 <TaskForm task={task} onClose={() => setEditingTask(null)} onSaved={refreshTasks} />
               ) : (
-                <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
-                  <input
-                    type="checkbox"
-                    checked={selectedTaskIds.includes(task._id)}
-                    onChange={() => toggleTaskSelection(task._id)}
-                    aria-label={`Select ${task.title}`}
-                    className="mt-1 h-4 w-4 shrink-0 rounded border-slate-300 text-orange-700 focus:ring-orange-500"
-                  />
-                  <button
+                <div className="flex flex-col gap-3 md:flex-row md:items-start md:gap-4">
+                  <div className="flex items-center gap-2 md:contents">
+                    <label className="flex min-h-11 min-w-11 shrink-0 items-center justify-start md:mt-1 md:min-h-0 md:min-w-0" title={`Select ${task.title}`}>
+                      <input
+                        type="checkbox"
+                        checked={selectedTaskIds.includes(task._id)}
+                        onChange={() => toggleTaskSelection(task._id)}
+                        aria-label={`Select ${task.title}`}
+                        className="h-5 w-5 rounded border-slate-300 text-orange-700 focus:ring-orange-500"
+                      />
+                    </label>
+                    <button
                     type="button"
                     aria-label={`Mark ${task.title} as ${task.status === 'done' ? 'not done' : 'complete'}`}
                     onClick={() => handleStatusChange(task, task.status === 'done' ? 'todo' : 'done')}
                     disabled={task.status !== 'done' && (task.dependsOn || []).some((dependency) => dependency && dependency.status !== 'done')}
                     title={task.status !== 'done' && (task.dependsOn || []).some((dependency) => dependency && dependency.status !== 'done') ? 'Complete prerequisite tasks first' : undefined}
-                    className={`mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border transition disabled:cursor-not-allowed disabled:opacity-40 ${
+                    className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full border transition disabled:cursor-not-allowed disabled:opacity-40 md:mt-0.5 md:h-6 md:w-6 ${
                       task.status === 'done' ? 'border-emerald-500 bg-emerald-500 text-white' : 'border-slate-300 text-slate-300 hover:border-orange-600 hover:text-orange-600'
                     }`}
-                  ><LuCheck aria-hidden="true" className="h-4 w-4" /></button>
+                    ><LuCheck aria-hidden="true" className="h-4 w-4" /></button>
+                  </div>
                   <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-center gap-2">
                       <h2 className={`text-sm font-semibold sm:text-base ${task.status === 'done' ? 'text-slate-400 line-through' : 'text-slate-900'}`}>{task.title}</h2>
@@ -362,27 +366,27 @@ const TaskList = () => {
                       <span>{task.estimatedHours ?? 2}h estimate</span>
                       <span>{task.dueDate ? `Due ${formatDateOnly(task.dueDate, { month: 'short', day: 'numeric', year: 'numeric' })}` : 'No due date'}</span>
                       <label className="sr-only" htmlFor={`status-${task._id}`}>Task status</label>
-                      <select id={`status-${task._id}`} value={task.status} onChange={(event) => handleStatusChange(task, event.target.value)} className="rounded border-0 bg-transparent p-0 text-xs text-slate-500 focus:ring-0">
+                      <select id={`status-${task._id}`} value={task.status} onChange={(event) => handleStatusChange(task, event.target.value)} className="min-h-11 rounded border-0 bg-transparent p-0 text-xs text-slate-500 focus:ring-0 md:min-h-0">
                         <option value="todo">Move to: To do</option>
                         <option value="in-progress">Move to: In progress</option>
                         <option value="done" disabled={(task.dependsOn || []).some((dependency) => dependency && dependency.status !== 'done')}>Move to: Completed</option>
                       </select>
                     </div>
                   </div>
-                  <div className="flex shrink-0 items-center gap-1 sm:ml-3">
+                  <div className="flex shrink-0 flex-wrap items-center gap-1 md:ml-3">
                     {task.project && (
                       <button
                         type="button"
                         onClick={() => toggleDiscussion(task._id)}
                         aria-expanded={activeDiscussionTaskId === task._id}
-                        className="inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-semibold text-slate-500 transition hover:bg-orange-50 hover:text-orange-800"
+                        className="inline-flex min-h-11 items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-semibold text-slate-500 transition hover:bg-orange-50 hover:text-orange-800 md:min-h-0"
                       >
                         <LuMessageCircle aria-hidden="true" className="h-4 w-4" />
                         Discuss
                       </button>
                     )}
-                    <button type="button" onClick={() => { setDiscussionTaskId(''); setEditingTask(task); }} className="rounded-lg px-3 py-2 text-xs font-semibold text-slate-500 transition hover:bg-slate-100 hover:text-slate-900">Edit</button>
-                    <button type="button" onClick={() => handleDelete(task)} className="rounded-lg px-3 py-2 text-xs font-semibold text-slate-400 transition hover:bg-rose-50 hover:text-rose-600">Delete</button>
+                    <button type="button" onClick={() => { setDiscussionTaskId(''); setEditingTask(task); }} className="min-h-11 rounded-lg px-3 py-2 text-xs font-semibold text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 md:min-h-0">Edit</button>
+                    <button type="button" onClick={() => handleDelete(task)} className="min-h-11 rounded-lg px-3 py-2 text-xs font-semibold text-slate-400 transition hover:bg-rose-50 hover:text-rose-600 md:min-h-0">Delete</button>
                   </div>
                 </div>
               )}

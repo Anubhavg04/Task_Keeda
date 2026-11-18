@@ -83,7 +83,7 @@ const DemoMetric = ({ label, value, caption, icon, tone }) => (
 );
 
 const JoinCard = ({ title = 'Ready to make this workspace yours?', description = 'Create an account to add your work, invite your team, and keep everything in sync.' }) => (
-  <aside className="flex flex-col gap-4 rounded-2xl bg-[#1e2b25] p-5 text-white sm:flex-row sm:items-center sm:justify-between sm:p-6">
+  <aside className="flex flex-col gap-4 rounded-2xl bg-[#1e2b25] p-5 text-white md:flex-row md:items-center md:justify-between md:p-6">
     <div>
       <p className="text-xs font-semibold uppercase tracking-[0.15em] text-orange-300">Like what you see?</p>
       <h2 className="mt-2 text-lg font-semibold">{title}</h2>
@@ -214,26 +214,26 @@ const FocusSprint = () => {
           {demoTasks.filter((task) => task.status !== 'Done').map((task) => <option key={task.title} value={task.title}>{task.title}</option>)}
         </select>
       </label>
-      <div className="mt-5 flex items-center justify-between gap-3">
+      <div className="mt-5 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
         <div aria-live="polite">
           <p className={`font-mono text-4xl font-semibold tracking-tight transition-colors duration-300 ${sprintComplete ? 'text-emerald-700' : 'text-slate-900'}`}>{minutes}:{seconds}</p>
           <p className="mt-1 text-xs text-slate-500">{sprintComplete ? 'Sprint complete. Nice work.' : sprintRunning ? 'One thing at a time.' : sprintPaused ? "Paused. Resume when you're ready." : 'Pick a pace and get started.'}</p>
         </div>
         <div className="flex items-center gap-2">
-          <button type="button" onClick={toggleSprint} aria-label={sprintRunning ? 'Pause focus sprint' : sprintActionLabel} className={`inline-flex h-10 w-10 items-center justify-center rounded-xl text-white transition-all duration-300 ease-in-out active:scale-95 ${sprintRunning ? 'bg-orange-800 hover:bg-orange-900' : 'bg-orange-700 hover:bg-orange-800'}`}>
+          <button type="button" onClick={toggleSprint} aria-label={sprintRunning ? 'Pause focus sprint' : sprintActionLabel} className={`inline-flex h-11 w-11 items-center justify-center rounded-xl text-white transition-all duration-300 ease-in-out active:scale-95 md:h-10 md:w-10 ${sprintRunning ? 'bg-orange-800 hover:bg-orange-900' : 'bg-orange-700 hover:bg-orange-800'}`}>
             {sprintRunning ? <LuPause aria-hidden="true" className="h-4 w-4" /> : <LuPlay aria-hidden="true" className="h-4 w-4" />}
           </button>
-          <button type="button" onClick={() => { setSecondsRemaining(duration * 60); setRunning(false); }} aria-label="Reset focus sprint" className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 text-slate-500 transition hover:bg-slate-50">
+          <button type="button" onClick={() => { setSecondsRemaining(duration * 60); setRunning(false); }} aria-label="Reset focus sprint" className="inline-flex h-11 w-11 items-center justify-center rounded-xl border border-slate-200 text-slate-500 transition hover:bg-slate-50 md:h-10 md:w-10">
             <LuRotateCcw aria-hidden="true" className="h-4 w-4" />
           </button>
         </div>
       </div>
       <div className="mt-4 h-1.5 overflow-hidden rounded-full bg-slate-100"><div className={`h-full rounded-full transition-[width,background-color] duration-500 ${sprintComplete ? 'bg-emerald-600' : 'bg-orange-600'}`} style={{ width: `${progress}%` }} /></div>
-      <div className="mt-3 flex items-center gap-2" aria-label="Focus sprint length">
+      <div className="mt-3 flex flex-wrap items-center gap-2" aria-label="Focus sprint length">
         {[15, 25, 45].map((option) => (
-          <button type="button" key={option} onClick={() => setSprintDuration(option)} aria-pressed={duration === option} className={`rounded-full px-3 py-1.5 text-xs font-semibold transition-colors duration-300 ${duration === option ? 'bg-orange-50 text-orange-800' : 'text-slate-400 hover:bg-slate-50 hover:text-slate-700'}`}>{option} min</button>
+          <button type="button" key={option} onClick={() => setSprintDuration(option)} aria-pressed={duration === option} className={`min-h-11 rounded-full px-3 py-1.5 text-xs font-semibold transition-colors duration-300 md:min-h-0 ${duration === option ? 'bg-orange-50 text-orange-800' : 'text-slate-400 hover:bg-slate-50 hover:text-slate-700'}`}>{option} min</button>
         ))}
-        <Link to="/register" className="ml-auto text-[11px] font-semibold text-orange-800 hover:text-orange-950">Save your progress</Link>
+        <Link to="/register" className="flex min-h-11 basis-full items-center justify-end text-[11px] font-semibold text-orange-800 hover:text-orange-950 md:ml-auto md:min-h-0 md:basis-auto">Save your progress</Link>
       </div>
     </article>
   );
@@ -277,7 +277,7 @@ const TasksView = ({ onRestrictedAction }) => {
 
   return (
     <div className="space-y-5">
-      <div className="flex flex-col gap-3 rounded-2xl border border-slate-200/80 bg-white p-4 shadow-sm sm:flex-row">
+      <div className="flex flex-col gap-3 rounded-2xl border border-slate-200/80 bg-white p-4 md:flex-row">
         <label className="relative min-w-0 flex-1">
           <span className="sr-only">Search demo tasks</span>
           <LuSearch aria-hidden="true" className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
@@ -425,9 +425,9 @@ const DemoWorkspace = () => {
 
   return (
     <div className="py-6 sm:py-8">
-      <div className="mb-5 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-orange-200/80 bg-orange-50/80 px-4 py-3">
-        <p className="text-sm text-orange-950"><span className="font-semibold">You're exploring a demo with sample data.</span> Sign up to create and edit real tasks.</p>
-        <Link to="/register" className="inline-flex shrink-0 items-center gap-1 text-sm font-semibold text-orange-800 hover:text-orange-950">Make it yours <LuArrowRight aria-hidden="true" className="h-4 w-4" /></Link>
+      <div className="mb-5 flex flex-col items-stretch gap-3 rounded-xl border border-orange-200/80 bg-orange-50/80 p-4 md:flex-row md:items-center md:justify-between md:px-4 md:py-3">
+        <p className="min-w-0 text-sm leading-6 text-orange-950"><span className="font-semibold">You're exploring a demo with sample data.</span> Sign up to create and edit real tasks.</p>
+        <Link to="/register" className="inline-flex min-h-11 shrink-0 items-center justify-center gap-1 rounded-lg px-3 text-sm font-semibold text-orange-800 transition hover:bg-orange-100 hover:text-orange-950 md:min-h-0">Make it yours <LuArrowRight aria-hidden="true" className="h-4 w-4" /></Link>
       </div>
 
       <div className="grid items-start gap-6 lg:grid-cols-[205px_minmax(0,1fr)]">
@@ -436,7 +436,7 @@ const DemoWorkspace = () => {
           {navigation.map((item) => {
             const active = activePath === item.path;
             return (
-              <Link key={item.path} to={item.path} aria-current={active ? 'page' : undefined} className={`inline-flex shrink-0 items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm font-medium transition ${active ? 'bg-orange-50 text-orange-900' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'}`}>
+              <Link key={item.path} to={item.path} aria-current={active ? 'page' : undefined} className={`inline-flex min-h-11 shrink-0 items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm font-medium transition ${active ? 'bg-orange-50 text-orange-900' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'}`}>
                 <item.icon aria-hidden="true" className={`h-[18px] w-[18px] ${active ? 'text-orange-700' : 'text-slate-400'}`} />{item.label}
               </Link>
             );
@@ -449,7 +449,7 @@ const DemoWorkspace = () => {
         </nav>
 
         <main className="min-w-0 space-y-6">
-          <header className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+          <header className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
             <div>
               <p className="mb-2 text-[11px] font-bold uppercase tracking-[0.16em] text-orange-700">{page.eyebrow}</p>
               <h1 className="text-2xl font-bold tracking-tight text-slate-950 sm:text-3xl">{page.title}</h1>

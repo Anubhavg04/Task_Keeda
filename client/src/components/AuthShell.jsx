@@ -11,7 +11,7 @@ import {
 } from 'react-icons/lu';
 
 const SignupShowcase = () => (
-  <section className="signup-showcase relative isolate flex min-h-[440px] flex-col justify-between overflow-hidden bg-[#18231f] px-6 py-8 text-white sm:px-10 sm:py-10 lg:min-h-0 lg:px-12 lg:py-12 xl:px-16">
+  <section className="signup-showcase relative isolate flex min-h-0 flex-col justify-between overflow-hidden bg-[#18231f] px-5 py-6 text-white md:min-h-[440px] md:px-10 md:py-10 lg:min-h-0 lg:px-12 lg:py-12 xl:px-16">
     <div aria-hidden="true" className="pointer-events-none absolute -left-36 -top-40 -z-10 h-[28rem] w-[28rem] rounded-full bg-orange-700/25 blur-3xl" />
     <div aria-hidden="true" className="pointer-events-none absolute -bottom-48 -right-36 -z-10 h-[30rem] w-[30rem] rounded-full bg-emerald-500/10 blur-3xl" />
 
@@ -32,8 +32,8 @@ const SignupShowcase = () => (
         </p>
       </div>
 
-      <div className="signup-art-enter relative mt-7 sm:mt-9">
-        <div className="overflow-hidden rounded-2xl border border-white/10 bg-[#f7f5ef] p-4 text-slate-900 shadow-2xl shadow-black/30 sm:p-5">
+      <div className="signup-art-enter relative mt-7 hidden md:block md:mt-9">
+        <div className="overflow-hidden rounded-2xl border border-white/10 bg-[#f7f5ef] p-4 text-slate-900 shadow-2xl shadow-black/30 md:p-5">
           <div className="flex items-center justify-between gap-3">
             <div className="flex min-w-0 items-center gap-3">
               <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-orange-100 text-orange-800">
@@ -118,9 +118,9 @@ const AuthShell = ({ eyebrow, title, description, children, variant = 'login' })
     <div className={`min-h-[calc(100svh-72px)] bg-[#faf8f4] ${isSignup ? 'lg:grid lg:grid-cols-[1.02fr_0.98fr]' : 'flex items-center justify-center'}`}>
       {isSignup && <SignupShowcase />}
 
-      <section className={`flex items-center justify-center px-5 py-10 sm:px-10 sm:py-12 lg:px-12 xl:px-16 ${isSignup ? '' : 'w-full'}`}>
+      <section className={`flex items-center justify-center px-4 py-7 md:px-10 md:py-12 lg:px-12 xl:px-16 ${isSignup ? '' : 'w-full'}`}>
         <div className="w-full max-w-[440px]">
-          <div className="mb-8">
+          <div className="mb-6 md:mb-8">
             <span className="inline-flex items-center gap-2 rounded-full border border-orange-200/80 bg-orange-50 px-3 py-1.5 text-xs font-semibold text-orange-800">
               <span className="h-1.5 w-1.5 rounded-full bg-orange-600" />
               {eyebrow}

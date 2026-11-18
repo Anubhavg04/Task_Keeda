@@ -158,7 +158,7 @@ const ProjectsPage = () => {
         eyebrow="Work, together"
         title="Team workspaces"
         description="Team workspaces for shared plans, tasks, and notes. Create a workspace, then invite teammates who already have a TaskFlow account."
-        action={<button type="button" onClick={() => setShowCreate((visible) => !visible)} className={buttonPrimary}>{showCreate ? 'Close' : <><LuPlus aria-hidden="true" className="h-4 w-4" />New team workspace</>}</button>}
+        action={<button type="button" onClick={() => setShowCreate((visible) => !visible)} className={`${buttonPrimary} min-h-11 w-full md:w-auto`}>{showCreate ? 'Close' : <><LuPlus aria-hidden="true" className="h-4 w-4" />New team workspace</>}</button>}
       />
 
       {showCreate && (
@@ -167,7 +167,7 @@ const ProjectsPage = () => {
             <h2 className="font-semibold text-slate-900">Create a team workspace</h2>
             <p className="mt-1 text-sm text-slate-500">A shared home for a team, client, campaign, or initiative.</p>
           </div>
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="grid gap-4 md:grid-cols-2">
             <label className="text-sm font-medium text-slate-700">
               Project name <span className="text-rose-500">*</span>
               <input autoFocus required maxLength={100} value={form.name} onChange={(event) => setForm((current) => ({ ...current, name: event.target.value }))} placeholder="e.g. Website redesign" className={`${inputClass} mt-2`} />
@@ -178,13 +178,13 @@ const ProjectsPage = () => {
                 {Object.keys(colors).map((color) => <option key={color} value={color}>{color[0].toUpperCase() + color.slice(1)}</option>)}
               </select>
             </label>
-            <label className="text-sm font-medium text-slate-700 sm:col-span-2">
+            <label className="text-sm font-medium text-slate-700 md:col-span-2">
               What is this project about?
               <textarea rows={2} maxLength={1000} value={form.description} onChange={(event) => setForm((current) => ({ ...current, description: event.target.value }))} placeholder="Add a short description and give your team some context..." className={`${inputClass} mt-2 resize-y`} />
             </label>
           </div>
           <div className="mt-4 flex justify-end">
-            <button type="submit" disabled={saving} className={buttonPrimary}>{saving ? 'Creating...' : 'Create team workspace'}</button>
+            <button type="submit" disabled={saving} className={`${buttonPrimary} min-h-11 w-full md:w-auto`}>{saving ? 'Creating...' : 'Create team workspace'}</button>
           </div>
         </form>
       )}
@@ -192,7 +192,7 @@ const ProjectsPage = () => {
       {error && <div className="mb-5"><ErrorState message={error} onRetry={loadProjects} /></div>}
       {discussionSummaryError && <div className="mb-4"><ErrorState message={discussionSummaryError} onRetry={refreshDiscussionSummaries} /></div>}
       {error ? null : loading ? <ProjectsCardsSkeleton /> : projects.length === 0 ? (
-        <EmptyState icon={LuFolderPlus} title="No projects yet" description="Create a team workspace to bring people, tasks, and reference notes together. You can invite registered TaskFlow users after creating it." action={<button type="button" onClick={() => setShowCreate(true)} className={buttonPrimary}>Create your first project</button>} />
+        <EmptyState icon={LuFolderPlus} title="No projects yet" description="Create a team workspace to bring people, tasks, and reference notes together. You can invite registered TaskFlow users after creating it." action={<button type="button" onClick={() => setShowCreate(true)} className={`${buttonPrimary} min-h-11 w-full md:w-auto`}>Create your first project</button>} />
       ) : (
         <section aria-label="Projects" className="grid gap-5 md:grid-cols-2 2xl:grid-cols-3">
           {projects.map((project) => {
@@ -203,7 +203,7 @@ const ProjectsPage = () => {
             const unreadCount = discussionSummary?.unreadCount || 0;
             return (
               <article key={project._id} className={`overflow-hidden rounded-2xl border border-slate-200/80 border-t-[3px] ${theme.edge} bg-white shadow-sm shadow-slate-200/30`}>
-                <div className="p-5 sm:p-6">
+                <div className="p-4 md:p-6">
                   <div className="flex items-start gap-3">
                     <span className={`mt-0.5 h-3 w-3 shrink-0 rounded-full ${theme.dot}`} />
                     <div className="min-w-0 flex-1">
@@ -211,7 +211,7 @@ const ProjectsPage = () => {
                       <span className={`mt-2 inline-flex rounded-full px-2.5 py-1 text-[11px] font-semibold ${theme.badge}`}>{isOwner ? 'Owner' : 'Member'}</span>
                     </div>
                     {isOwner && (
-                      <button type="button" onClick={() => handleDeleteProject(project)} disabled={busyProject === project._id} aria-label={`Delete ${project.name}`} title="Delete project" className="rounded-lg px-2 py-1 text-xs font-medium text-slate-400 transition hover:bg-rose-50 hover:text-rose-600 disabled:opacity-50">Delete</button>
+                      <button type="button" onClick={() => handleDeleteProject(project)} disabled={busyProject === project._id} aria-label={`Delete ${project.name}`} title="Delete project" className="min-h-11 min-w-11 rounded-lg px-2 py-1 text-xs font-medium text-slate-400 transition hover:bg-rose-50 hover:text-rose-600 disabled:opacity-50 md:min-h-0 md:min-w-0">Delete</button>
                     )}
                   </div>
                   <p className="mt-4 min-h-10 text-sm leading-6 text-slate-500">{project.description || 'A shared space to organize work and keep the team moving.'}</p>
@@ -232,26 +232,26 @@ const ProjectsPage = () => {
                         <div key={member._id} className="flex items-center justify-between gap-2 text-xs">
                           <span className="truncate text-slate-600">{member.fullname}{String(member._id) === String(project.owner?._id) ? ' · Owner' : ''}</span>
                           {isOwner && String(member._id) !== String(project.owner?._id) && (
-                            <button type="button" disabled={busyProject === project._id} onClick={() => handleRemoveMember(project, member)} className="shrink-0 rounded px-2 py-1 text-slate-400 hover:bg-rose-50 hover:text-rose-600">Remove</button>
+                            <button type="button" disabled={busyProject === project._id} onClick={() => handleRemoveMember(project, member)} className="min-h-11 shrink-0 rounded px-2 py-1 text-slate-400 hover:bg-rose-50 hover:text-rose-600 md:min-h-0">Remove</button>
                           )}
                         </div>
                       ))}
                     </div>
                   </div>
                   {isOwner && (
-                    <form className="mt-4 flex gap-2" onSubmit={(event) => { event.preventDefault(); handleInvite(project); }}>
+                    <form className="mt-4 flex flex-col gap-2 md:flex-row" onSubmit={(event) => { event.preventDefault(); handleInvite(project); }}>
                       <label className="sr-only" htmlFor={`invite-${project._id}`}>Invite by email</label>
-                      <input id={`invite-${project._id}`} type="email" required maxLength={254} value={memberEmails[project._id] || ''} onChange={(event) => setMemberEmails((current) => ({ ...current, [project._id]: event.target.value }))} placeholder="Add teammate by email" className="min-w-0 flex-1 rounded-lg border border-slate-200 px-3 py-2 text-xs text-slate-800 placeholder:text-slate-400 focus:border-orange-400 focus:outline-none focus:ring-4 focus:ring-orange-50" />
-                      <button type="submit" disabled={busyProject === project._id} className="rounded-lg bg-slate-900 px-3 py-2 text-xs font-semibold text-white transition hover:bg-slate-700 disabled:opacity-50">{busyProject === project._id ? 'Adding...' : 'Invite'}</button>
+                      <input id={`invite-${project._id}`} type="email" required maxLength={254} value={memberEmails[project._id] || ''} onChange={(event) => setMemberEmails((current) => ({ ...current, [project._id]: event.target.value }))} placeholder="Add teammate by email" className="min-h-11 min-w-0 flex-1 rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 focus:border-orange-400 focus:outline-none focus:ring-4 focus:ring-orange-50 md:text-xs" />
+                      <button type="submit" disabled={busyProject === project._id} className="min-h-11 rounded-lg bg-slate-900 px-3 py-2 text-sm font-semibold text-white transition hover:bg-slate-700 disabled:opacity-50 md:min-h-0 md:text-xs">{busyProject === project._id ? 'Adding...' : 'Invite'}</button>
                     </form>
                   )}
-                  <div className="mt-5 flex gap-2 border-t border-slate-100 pt-4">
-                    <Link to={`/tasks?projectId=${project._id}`} className={`flex-1 rounded-lg px-2 py-2 text-center text-xs font-semibold transition ${theme.button}`}>View tasks</Link>
-                    <Link to={`/projects/${project._id}/chat`} title={discussionSummary?.lastMessage?.content || 'Open team chat'} className="flex flex-1 items-center justify-center gap-1.5 rounded-lg bg-orange-50 px-2 py-2 text-center text-xs font-semibold text-orange-800 transition hover:bg-orange-100">
+                  <div className="mt-5 grid grid-cols-2 gap-2 border-t border-slate-100 pt-4 md:flex">
+                    <Link to={`/tasks?projectId=${project._id}`} className={`flex min-h-11 items-center justify-center rounded-lg px-2 py-2 text-center text-xs font-semibold transition md:flex-1 ${theme.button}`}>View tasks</Link>
+                    <Link to={`/projects/${project._id}/chat`} title={discussionSummary?.lastMessage?.content || 'Open team chat'} className="flex min-h-11 items-center justify-center gap-1.5 rounded-lg bg-orange-50 px-2 py-2 text-center text-xs font-semibold text-orange-800 transition hover:bg-orange-100 md:flex-1">
                       Team chat
                       {unreadCount > 0 && <span className="rounded-full bg-orange-700 px-1.5 py-0.5 text-[10px] leading-none text-white">{unreadCount > 99 ? '99+' : unreadCount}</span>}
                     </Link>
-                    <Link to={`/notes?projectId=${project._id}`} className="flex-1 rounded-lg bg-slate-50 px-2 py-2 text-center text-xs font-semibold text-slate-600 transition hover:bg-slate-100">Project notes</Link>
+                    <Link to={`/notes?projectId=${project._id}`} className="col-span-2 flex min-h-11 items-center justify-center rounded-lg bg-slate-50 px-2 py-2 text-center text-xs font-semibold text-slate-600 transition hover:bg-slate-100 md:col-span-1 md:flex-1">Project notes</Link>
                   </div>
                   {discussionSummary?.lastMessage && (
                     <p className="mt-2 truncate text-xs text-slate-400" title={discussionSummary.lastMessage.content}>
