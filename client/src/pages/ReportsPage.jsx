@@ -3,14 +3,9 @@ import { LuArrowDownToLine, LuBriefcaseBusiness, LuCircleAlert, LuCircleCheck, L
 import toast from 'react-hot-toast';
 import { taskAPI } from '../services/api.js';
 import { ErrorState, MetricCard, PageHeading, ReportsSkeleton, buttonSecondary } from '../components/WorkspaceUI.jsx';
+import { getTaskPriorityVisual, getTaskStatusVisual, taskPriorityOrder } from '../utils/taskVisuals.js';
+import { TaskPriorityIndicator, TaskStatusBadge } from '../components/TaskVisuals.jsx';
 import { formatDateOnly } from '../utils/dates.js';
-
-const priorityTones = {
-  urgent: 'bg-rose-500',
-  high: 'bg-amber-500',
-  medium: 'bg-blue-500',
-  low: 'bg-slate-400',
-};
 
 const csvCell = (value) => {
   const safeValue = String(value ?? '').replace(/^[\t\r\n ]*[=+\-@]/, "'$&");
@@ -114,22 +109,22 @@ const ReportsPage = () => {
               </div>
               <div className="mb-6 flex h-3 overflow-hidden rounded-full bg-slate-100" role="img" aria-label={`${summary?.todo || 0} to do, ${summary?.inProgress || 0} in progress, ${summary?.done || 0} completed`}>
                 {[
-                  ['todo', summary?.todo || 0, 'bg-slate-400'],
-                  ['in progress', summary?.inProgress || 0, 'bg-amber-400'],
-                  ['completed', summary?.done || 0, 'bg-emerald-500'],
-                ].map(([label, count, color]) => (
-                  <div key={label} title={`${label}: ${count}`} className={`${color} transition-all`} style={{ width: `${summary?.total ? (count / summary.total) * 100 : 0}%` }} />
+                  ['todo', summary?.todo || 0],
+                  ['in-progress', summary?.inProgress || 0],
+                  ['done', summary?.done || 0],
+                ].map(([status, count]) => (
+                  <div key={status} title={`${getTaskStatusVisual(status).label}: ${count}`} className={`${getTaskStatusVisual(status).bar} transition-all`} style={{ width: `${summary?.total ? (count / summary.total) * 100 : 0}%` }} />
                 ))}
               </div>
               <div className="space-y-4">
                 {[
-                  ['To do', summary?.todo || 0, 'bg-slate-400'],
-                  ['In progress', summary?.inProgress || 0, 'bg-amber-400'],
-                  ['Completed', summary?.done || 0, 'bg-emerald-500'],
-                ].map(([label, count, color]) => (
-                  <div key={label} className="flex items-center gap-3">
-                    <span className={`h-2.5 w-2.5 rounded-full ${color}`} />
-                    <span className="flex-1 text-sm text-slate-600">{label}</span>
+                  ['todo', summary?.todo || 0],
+                  ['in-progress', summary?.inProgress || 0],
+                  ['done', summary?.done || 0],
+                ].map(([status, count]) => (
+                  <div key={status} className="flex items-center gap-3">
+                    <TaskStatusBadge status={status} />
+                    <span className="flex-1" />
                     <span className="text-sm font-semibold text-slate-900">{count}</span>
                     <span className="w-10 text-right text-xs text-slate-400">{summary?.total ? Math.round((count / summary.total) * 100) : 0}%</span>
                   </div>
@@ -143,14 +138,14 @@ const ReportsPage = () => {
                 <p className="mt-1 text-sm text-slate-500">Use priority to focus the team's attention</p>
               </div>
               <div className="space-y-5">
-                {['urgent', 'high', 'medium', 'low'].map((priority) => (
+                {taskPriorityOrder.map((priority) => (
                   <div key={priority}>
                     <div className="mb-2 flex items-center justify-between">
-                      <span className="text-sm font-medium capitalize text-slate-700">{priority}</span>
+                      <TaskPriorityIndicator priority={priority} />
                       <span className="text-sm font-semibold text-slate-900">{activePriorities[priority] || 0}</span>
                     </div>
                     <div className="h-2 overflow-hidden rounded-full bg-slate-100">
-                      <div className={`h-full rounded-full ${priorityTones[priority]} transition-all`} style={{ width: `${((activePriorities[priority] || 0) / maxPriority) * 100}%` }} />
+                      <div className={`h-full rounded-full ${getTaskPriorityVisual(priority).bar} transition-all`} style={{ width: `${((activePriorities[priority] || 0) / maxPriority) * 100}%` }} />
                     </div>
                   </div>
                 ))}

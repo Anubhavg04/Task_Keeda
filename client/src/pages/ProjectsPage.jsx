@@ -6,6 +6,8 @@ import { LuFolderPlus, LuPlus } from 'react-icons/lu';
 import { useAuth } from '../context/useAuth.js';
 import { discussionAPI, projectAPI } from '../services/api.js';
 import { EmptyState, ErrorState, PageHeading, ProjectsCardsSkeleton, buttonPrimary, inputClass } from '../components/WorkspaceUI.jsx';
+import { taskPriorityOrder, taskStatusOrder } from '../utils/taskVisuals.js';
+import { TaskPriorityIndicator, TaskStatusBadge } from '../components/TaskVisuals.jsx';
 
 const colors = {
   orange: { edge: 'border-t-orange-500', badge: 'bg-orange-50 text-orange-700', dot: 'bg-orange-500', button: 'text-orange-700 hover:bg-orange-50' },
@@ -201,6 +203,8 @@ const ProjectsPage = () => {
             const team = [project.owner, ...(project.members || [])].filter(Boolean);
             const discussionSummary = discussionSummaries[String(project._id)];
             const unreadCount = discussionSummary?.unreadCount || 0;
+            const taskSummary = project.taskSummary || { total: 0, todo: 0, inProgress: 0, done: 0 };
+            const highestOpenPriority = taskPriorityOrder.find((priority) => (taskSummary[priority] || 0) > 0);
             return (
               <article key={project._id} className={`overflow-hidden rounded-2xl border border-slate-200/80 border-t-[3px] ${theme.edge} bg-white shadow-sm shadow-slate-200/30`}>
                 <div className="p-4 md:p-6">
@@ -215,6 +219,28 @@ const ProjectsPage = () => {
                     )}
                   </div>
                   <p className="mt-4 min-h-10 text-sm leading-6 text-slate-500">{project.description || 'A shared space to organize work and keep the team moving.'}</p>
+                  <div className="mt-4 rounded-xl bg-slate-50 p-3 dark:bg-slate-900">
+                    <div className="mb-2 flex items-center justify-between gap-2">
+                      <span className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">Task status</span>
+                      <span className="text-xs text-slate-500">{taskSummary.total || 0} tasks</span>
+                    </div>
+                    <div className="flex flex-wrap gap-1.5">
+                      {taskStatusOrder.map((status) => (
+                        <TaskStatusBadge
+                          key={status}
+                          status={status}
+                          count={taskSummary[status === 'in-progress' ? 'inProgress' : status] || 0}
+                          className="px-2 py-0.5 text-[10px]"
+                        />
+                      ))}
+                    </div>
+                    <div className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-slate-200 pt-2 dark:border-slate-700">
+                      <span className="text-xs font-medium text-slate-500">Highest open priority</span>
+                      {highestOpenPriority
+                        ? <TaskPriorityIndicator priority={highestOpenPriority} count={taskSummary[highestOpenPriority]} />
+                        : <span className="text-xs text-slate-500">No open tasks</span>}
+                    </div>
+                  </div>
                   <div className="mt-5 border-t border-slate-100 pt-4">
                     <div className="mb-3 flex items-center justify-between">
                       <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">Team · {team.length}</span>

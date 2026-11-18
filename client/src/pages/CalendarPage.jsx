@@ -4,14 +4,11 @@ import toast from 'react-hot-toast';
 import { LuChevronLeft, LuChevronRight, LuPlus, LuX } from 'react-icons/lu';
 import { taskAPI } from '../services/api.js';
 import { EmptyState, ErrorState, LoadingState, PageHeading, buttonSecondary } from '../components/WorkspaceUI.jsx';
+import { getTaskStatusVisual, taskStatusOrder } from '../utils/taskVisuals.js';
+import { TaskPriorityIndicator, TaskStatusBadge } from '../components/TaskVisuals.jsx';
 import { formatDateOnly } from '../utils/dates.js';
 
 const dayKey = (date) => `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
-const statusClass = {
-  todo: 'border-slate-200 bg-slate-50 text-slate-700',
-  'in-progress': 'border-amber-200 bg-amber-50 text-amber-800',
-  done: 'border-emerald-200 bg-emerald-50 text-emerald-800',
-};
 
 const CalendarPage = () => {
   const [activeDate, setActiveDate] = useState(() => new Date());
@@ -147,7 +144,11 @@ const CalendarPage = () => {
                       </div>
                       <div className="space-y-1">
                         {dayTasks.slice(0, 3).map((task) => (
-                          <button key={task._id} type="button" aria-haspopup="dialog" aria-expanded={selectedTaskId === task._id} onClick={() => openTaskDetails(task._id)} title={task.title} className={`block w-full truncate rounded-md border px-1.5 py-1 text-left text-[10px] leading-4 transition hover:ring-2 hover:ring-orange-200 sm:px-2 sm:text-xs ${statusClass[task.status] || statusClass.todo} ${task.status === 'done' ? 'line-through opacity-60' : 'font-medium'}`}>{task.title}</button>
+                          <button key={task._id} type="button" aria-haspopup="dialog" aria-expanded={selectedTaskId === task._id} onClick={() => openTaskDetails(task._id)} title={task.title} className={`flex w-full items-center gap-1 truncate rounded-md border-l-2 px-1.5 py-1 text-left text-[10px] leading-4 transition hover:ring-2 hover:ring-orange-200 sm:px-2 sm:text-xs ${getTaskStatusVisual(task.status).badge} ${task.status === 'done' ? 'border-l-emerald-600 line-through opacity-60' : task.status === 'in-progress' ? 'border-l-orange-600 font-medium' : 'border-l-slate-500 font-medium'}`}>
+                            <span aria-label={`Status: ${getTaskStatusVisual(task.status).label}`} className={`h-1.5 w-1.5 shrink-0 rounded-full ${getTaskStatusVisual(task.status).dot}`} />
+                            <span className="min-w-0 flex-1 truncate">{task.title}</span>
+                            <TaskPriorityIndicator priority={task.priority} compact />
+                          </button>
                         ))}
                         {dayTasks.length > 3 && <p className="px-1 text-[10px] font-medium text-slate-400">+{dayTasks.length - 3} more</p>}
                       </div>
@@ -171,9 +172,12 @@ const CalendarPage = () => {
                     {dayTasks.length ? (
                       <div className="space-y-2">
                         {dayTasks.map((task) => (
-                          <button key={task._id} type="button" aria-haspopup="dialog" aria-expanded={selectedTaskId === task._id} onClick={() => openTaskDetails(task._id)} className={`flex min-h-11 w-full items-center justify-between gap-3 rounded-xl border px-3 py-2 text-left text-sm transition hover:border-orange-200 hover:bg-orange-50/50 ${statusClass[task.status] || statusClass.todo}`}>
+                          <button key={task._id} type="button" aria-haspopup="dialog" aria-expanded={selectedTaskId === task._id} onClick={() => openTaskDetails(task._id)} className={`flex min-h-11 w-full items-center justify-between gap-3 rounded-xl border border-l-2 px-3 py-2 text-left text-sm transition hover:border-orange-200 hover:bg-orange-50/50 ${getTaskStatusVisual(task.status).badge} ${task.status === 'done' ? 'border-l-emerald-600' : task.status === 'in-progress' ? 'border-l-orange-600' : 'border-l-slate-500'}`}>
                             <span className={`min-w-0 truncate font-medium ${task.status === 'done' ? 'line-through opacity-60' : ''}`}>{task.title}</span>
-                            <span className="shrink-0 text-xs capitalize">{task.status.replace('-', ' ')}</span>
+                            <span className="flex shrink-0 items-center gap-2">
+                              <TaskStatusBadge status={task.status} />
+                              <TaskPriorityIndicator priority={task.priority} compact />
+                            </span>
                           </button>
                         ))}
                       </div>
@@ -195,7 +199,10 @@ const CalendarPage = () => {
             <button type="button" onClick={() => setSelectedTaskId('')} aria-label="Close task details" className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-lg text-slate-500 transition hover:bg-slate-100 hover:text-slate-800"><LuX aria-hidden="true" className="h-4 w-4" /></button>
           </div>
           <div className="mt-3 flex flex-wrap items-center justify-between gap-3 border-t border-slate-100 pt-3">
-            <span className={`rounded-full border px-2.5 py-1 text-xs font-medium capitalize ${statusClass[selectedTask.status] || statusClass.todo}`}>{selectedTask.status.replace('-', ' ')}</span>
+            <span className="flex flex-wrap items-center gap-2">
+              <TaskStatusBadge status={selectedTask.status} />
+              <TaskPriorityIndicator priority={selectedTask.priority} />
+            </span>
             <span className="text-xs text-slate-500">Due {formatDateOnly(selectedTask.dueDate, { month: 'long', day: 'numeric', year: 'numeric' })}</span>
           </div>
           <label className="mt-3 block text-xs font-medium text-slate-500">
@@ -214,9 +221,7 @@ const CalendarPage = () => {
         </div>
       )}
       <div className="mt-4 flex flex-wrap gap-4 text-xs text-slate-500">
-        <span className="flex items-center gap-2"><i className="h-2.5 w-2.5 rounded-full bg-slate-400" />To do</span>
-        <span className="flex items-center gap-2"><i className="h-2.5 w-2.5 rounded-full bg-amber-400" />In progress</span>
-        <span className="flex items-center gap-2"><i className="h-2.5 w-2.5 rounded-full bg-emerald-500" />Completed</span>
+        {taskStatusOrder.map((status) => <TaskStatusBadge key={status} status={status} />)}
       </div>
     </div>
   );

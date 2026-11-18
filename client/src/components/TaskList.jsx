@@ -6,27 +6,10 @@ import { useTasks } from '../hooks/useTasks.js';
 import { projectAPI } from '../services/api.js';
 import DiscussionThread from './DiscussionThread.jsx';
 import TaskForm from './TaskForm.jsx';
+import { getTaskStatusVisual } from '../utils/taskVisuals.js';
+import { TaskPriorityIndicator, TaskStatusBadge } from './TaskVisuals.jsx';
 import { EmptyState, ErrorState, PageHeading, TasksListSkeleton, buttonPrimary, inputClass } from './WorkspaceUI.jsx';
 import { formatDateOnly } from '../utils/dates.js';
-
-const statusStyles = {
-  todo: 'bg-slate-100 text-slate-600',
-  'in-progress': 'bg-amber-50 text-amber-800',
-  done: 'bg-emerald-50 text-emerald-700',
-};
-
-const statusDotStyles = {
-  todo: 'bg-slate-400',
-  'in-progress': 'bg-amber-500',
-  done: 'bg-emerald-500',
-};
-
-const priorityDotStyles = {
-  low: 'bg-slate-400',
-  medium: 'bg-blue-500',
-  high: 'bg-amber-500',
-  urgent: 'bg-rose-500',
-};
 
 const TaskList = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -311,7 +294,7 @@ const TaskList = () => {
             )}
           </div>
           {tasks.map((task) => (
-            <article key={task._id} className={`group rounded-xl border border-slate-200/80 border-l-2 bg-white p-3 shadow-sm shadow-slate-200/20 transition-colors hover:border-orange-200 hover:bg-orange-50/30 focus-within:border-orange-200 ${task.status === 'done' ? 'border-l-emerald-500' : task.status === 'in-progress' ? 'border-l-amber-500' : 'border-l-slate-300'}`}>
+            <article key={task._id} className={`group rounded-xl border border-slate-200/80 border-l-2 bg-white p-3 shadow-sm shadow-slate-200/20 transition-colors hover:border-orange-200 hover:bg-orange-50/30 focus-within:border-orange-200 ${task.status === 'done' ? 'border-l-emerald-600' : task.status === 'in-progress' ? 'border-l-orange-600' : 'border-l-slate-500'}`}>
               {editingTask?._id === task._id ? (
                 <TaskForm task={task} onClose={() => setEditingTask(null)} onSaved={refreshTasks} />
               ) : (
@@ -326,15 +309,13 @@ const TaskList = () => {
                         className="h-4 w-4 rounded border-slate-300 text-orange-700 focus:ring-orange-500"
                       />
                     </label>
-                    <span aria-label={`Status: ${task.status.replace('-', ' ')}`} title={`Status: ${task.status.replace('-', ' ')}`} className={`mt-0.5 h-2.5 w-2.5 shrink-0 rounded-full ring-4 ring-white ${statusDotStyles[task.status] || statusDotStyles.todo}`} />
+                    <span aria-label={`Status: ${getTaskStatusVisual(task.status).label}`} title={`Status: ${getTaskStatusVisual(task.status).label}`} className={`mt-0.5 h-2.5 w-2.5 shrink-0 rounded-full ring-4 ring-white ${getTaskStatusVisual(task.status).dot}`} />
                   </div>
                   <div className="min-w-0 flex-1">
                     <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1">
                       <h2 className={`min-w-0 max-w-full truncate text-sm font-semibold tracking-tight sm:text-[15px] ${task.status === 'done' ? 'text-slate-400 line-through' : 'text-slate-900'}`}>{task.title}</h2>
-                      <span className={`inline-flex shrink-0 items-center gap-1.5 rounded-full px-2 py-0.5 text-[10px] font-semibold capitalize ${statusStyles[task.status] || statusStyles.todo}`}>
-                        <span className={`h-1.5 w-1.5 rounded-full ${statusDotStyles[task.status] || statusDotStyles.todo}`} />
-                        {task.status.replace('-', ' ')}
-                      </span>
+                      <TaskStatusBadge status={task.status} />
+                      <TaskPriorityIndicator priority={task.priority} />
                     </div>
                     <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1.5 text-xs text-slate-500">
                       <span className="max-w-40 truncate font-medium text-slate-600">{task.project?.name || 'Personal'}</span>
@@ -349,10 +330,6 @@ const TaskList = () => {
                       <span className="inline-flex items-center gap-1 whitespace-nowrap">
                         <LuCalendarDays aria-hidden="true" className="h-3.5 w-3.5 text-slate-400" />
                         {task.dueDate ? formatDateOnly(task.dueDate, { month: 'short', day: 'numeric' }) : 'No due date'}
-                      </span>
-                      <span className="inline-flex items-center gap-1.5 capitalize">
-                        <span className={`h-2 w-2 rounded-full ${priorityDotStyles[task.priority] || priorityDotStyles.medium}`} />
-                        {task.priority || 'medium'}
                       </span>
                       <span className="whitespace-nowrap text-slate-400">{task.estimatedHours ?? 2}h</span>
                     </div>

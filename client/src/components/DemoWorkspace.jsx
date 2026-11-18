@@ -23,6 +23,8 @@ import {
   LuUsersRound,
   LuX,
 } from 'react-icons/lu';
+import { getTaskPriorityVisual, getTaskStatusVisual, taskPriorityOrder, taskStatusOrder } from '../utils/taskVisuals.js';
+import { TaskPriorityIndicator, TaskStatusBadge } from './TaskVisuals.jsx';
 
 const navigation = [
   { label: 'Overview', path: '/', icon: LuLayoutDashboard },
@@ -61,12 +63,6 @@ const demoNotes = [
   { title: 'Campaign voice and tone', project: 'Spring campaign', updated: 'Updated yesterday', content: 'Warm, useful, and direct. Lead with the customer outcome, not the feature list.' },
   { title: 'Weekly team rhythm', project: 'Studio operations', updated: 'Updated this week', content: 'Share priorities on Monday, protect focus time, and close the loop before Friday.' },
 ];
-
-const statusClass = {
-  'To do': 'bg-slate-100 text-slate-600',
-  'In progress': 'bg-amber-50 text-amber-800',
-  Done: 'bg-emerald-50 text-emerald-700',
-};
 
 const dateLabel = (date, options = { month: 'short', day: 'numeric' }) => date.toLocaleDateString(undefined, options);
 
@@ -130,8 +126,8 @@ const DemoSignupPrompt = ({ message, onClose }) => {
 };
 
 const DemoTaskRow = ({ task }) => (
-  <li className="flex items-center gap-3 border-b border-slate-100 px-4 py-3.5 last:border-0 sm:px-5">
-    <span className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${task.status === 'Done' ? 'bg-emerald-50 text-emerald-700' : task.status === 'In progress' ? 'bg-amber-50 text-amber-700' : 'bg-slate-100 text-slate-500'}`}>
+  <li className={`flex items-center gap-3 border-b border-l-2 border-slate-100 px-4 py-3.5 last:border-0 sm:px-5 ${task.status === 'Done' ? 'border-l-emerald-600' : task.status === 'In progress' ? 'border-l-orange-600' : 'border-l-slate-500'}`}>
+    <span className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${task.status === 'Done' ? 'bg-emerald-50 text-emerald-700' : task.status === 'In progress' ? 'bg-orange-50 text-orange-800' : 'bg-slate-100 text-slate-500'}`}>
       {task.status === 'Done' ? <LuCheck aria-hidden="true" className="h-4 w-4" /> : task.status === 'In progress' ? <LuClock3 aria-hidden="true" className="h-4 w-4" /> : <LuCircleCheck aria-hidden="true" className="h-4 w-4" />}
     </span>
     <div className="min-w-0 flex-1">
@@ -139,26 +135,57 @@ const DemoTaskRow = ({ task }) => (
       <p className="mt-1 truncate text-xs text-slate-500">{task.project} · {task.assignee}</p>
     </div>
     <span className="hidden text-xs text-slate-500 sm:block">{dateLabel(task.due)}</span>
-    <span className={`rounded-full px-2.5 py-1 text-[10px] font-semibold ${statusClass[task.status]}`}>{task.status}</span>
+    <span className="flex shrink-0 flex-col items-end gap-1 sm:flex-row sm:items-center">
+      <TaskStatusBadge status={task.status} className="px-2 py-0.5 text-[10px]" />
+      <TaskPriorityIndicator priority={task.priority} />
+    </span>
   </li>
 );
 
-const ProjectCard = ({ project }) => (
-  <article className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm shadow-slate-200/20">
-    <div className="flex items-center justify-between">
-      <span className={`h-3 w-3 rounded-full ${project.color}`} />
-      <span className="rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-semibold text-slate-500">{project.type}</span>
-    </div>
-    <h3 className="mt-4 font-semibold text-slate-900">{project.name}</h3>
-    <p className="mt-1 min-h-10 text-sm leading-5 text-slate-500">{project.description}</p>
-    <div className="mt-4 flex items-center justify-between border-t border-slate-100 pt-4">
-      <span className="text-xs text-slate-500">Shared with your team</span>
-      <div className="flex -space-x-2">
-        {project.members.map((member, index) => <span key={`${member}-${index}`} className="flex h-7 w-7 items-center justify-center rounded-full border-2 border-white bg-orange-100 text-[10px] font-bold text-orange-800">{member}</span>)}
+const ProjectCard = ({ project }) => {
+  const projectTasks = demoTasks.filter((task) => task.project === project.name);
+  const statusCounts = {
+    todo: projectTasks.filter((task) => task.status === 'To do').length,
+    'in-progress': projectTasks.filter((task) => task.status === 'In progress').length,
+    done: projectTasks.filter((task) => task.status === 'Done').length,
+  };
+  const openPriority = taskPriorityOrder.find((priority) => projectTasks.some((task) => (
+    task.status !== 'Done' && task.priority.toLowerCase() === priority
+  )));
+  const priorityCount = openPriority
+    ? projectTasks.filter((task) => task.status !== 'Done' && task.priority.toLowerCase() === openPriority).length
+    : 0;
+
+  return (
+    <article className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm shadow-slate-200/20">
+      <div className="flex items-center justify-between">
+        <span className={`h-3 w-3 rounded-full ${project.color}`} />
+        <span className="rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-semibold text-slate-500">{project.type}</span>
       </div>
-    </div>
-  </article>
-);
+      <h3 className="mt-4 font-semibold text-slate-900">{project.name}</h3>
+      <p className="mt-1 min-h-10 text-sm leading-5 text-slate-500">{project.description}</p>
+      <div className="mt-4 rounded-xl bg-slate-50 p-3 dark:bg-slate-900">
+        <div className="mb-2 flex items-center justify-between gap-2">
+          <span className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">Task status</span>
+          <span className="text-xs text-slate-500">{projectTasks.length} tasks</span>
+        </div>
+        <div className="flex flex-wrap gap-1.5">
+          {taskStatusOrder.map((status) => <TaskStatusBadge key={status} status={status} count={statusCounts[status]} className="px-2 py-0.5 text-[10px]" />)}
+        </div>
+        <div className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-slate-200 pt-2 dark:border-slate-700">
+          <span className="text-xs font-medium text-slate-500">Highest open priority</span>
+          {openPriority ? <TaskPriorityIndicator priority={openPriority} count={priorityCount} /> : <span className="text-xs text-slate-500">No open tasks</span>}
+        </div>
+      </div>
+      <div className="mt-4 flex items-center justify-between border-t border-slate-100 pt-4">
+        <span className="text-xs text-slate-500">Shared with your team</span>
+        <div className="flex -space-x-2">
+          {project.members.map((member, index) => <span key={`${member}-${index}`} className="flex h-7 w-7 items-center justify-center rounded-full border-2 border-white bg-orange-100 text-[10px] font-bold text-orange-800">{member}</span>)}
+        </div>
+      </div>
+    </article>
+  );
+};
 
 const FocusSprint = () => {
   const [duration, setDuration] = useState(25);
@@ -360,12 +387,6 @@ const CalendarView = () => {
   const monthLabel = activeDate.toLocaleDateString(undefined, { month: 'long', year: 'numeric' });
   const weekLabel = `${days[0]?.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })} – ${days[6]?.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}`;
   const toggleTaskDetails = (title) => setSelectedTaskTitle((current) => current === title ? '' : title);
-  const statusTone = (status) => status === 'Done'
-    ? 'border-emerald-200 bg-emerald-50 text-emerald-800'
-    : status === 'In progress'
-      ? 'border-amber-200 bg-amber-50 text-amber-800'
-      : 'border-slate-200 bg-slate-50 text-slate-700';
-
   return (
     <div className="space-y-5">
       <section className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm">
@@ -395,7 +416,7 @@ const CalendarView = () => {
                 return (
                   <div key={day.toISOString()} className={`min-h-[76px] border-b border-r border-slate-100 p-1.5 sm:min-h-24 sm:p-2 ${isCurrentMonth ? 'bg-white' : 'bg-slate-50/60'}`}>
                     <span className={`flex h-6 w-6 items-center justify-center rounded-full text-[11px] ${isToday ? 'bg-orange-700 font-bold text-white' : isCurrentMonth ? 'text-slate-600' : 'text-slate-300'}`}>{day.getDate()}</span>
-                    {tasks.slice(0, 2).map((task) => <button key={task.title} type="button" aria-haspopup="dialog" aria-expanded={selectedTaskTitle === task.title} onClick={() => toggleTaskDetails(task.title)} title={task.title} className="mt-1 block min-h-9 w-full truncate rounded border border-slate-200 bg-orange-50 px-1 py-1 text-left text-[9px] font-medium text-orange-800 sm:text-[10px]">{task.title}</button>)}
+                    {tasks.slice(0, 2).map((task) => <button key={task.title} type="button" aria-haspopup="dialog" aria-expanded={selectedTaskTitle === task.title} onClick={() => toggleTaskDetails(task.title)} title={task.title} className={`mt-1 flex min-h-9 w-full items-center gap-1 truncate rounded border-l-2 px-1 py-1 text-left text-[9px] sm:text-[10px] ${getTaskStatusVisual(task.status).badge} ${task.status === 'Done' ? 'border-l-emerald-600 line-through opacity-60' : task.status === 'In progress' ? 'border-l-orange-600 font-medium' : 'border-l-slate-500 font-medium'}`}><span aria-label={`Status: ${getTaskStatusVisual(task.status).label}`} className={`h-1.5 w-1.5 shrink-0 rounded-full ${getTaskStatusVisual(task.status).dot}`} /><span className="min-w-0 flex-1 truncate">{task.title}</span><TaskPriorityIndicator priority={task.priority} compact /></button>)}
                     {tasks.length > 2 && <p className="mt-1 text-[9px] text-slate-400">+{tasks.length - 2} more</p>}
                   </div>
                 );
@@ -414,7 +435,7 @@ const CalendarView = () => {
                     <span className="text-xs text-slate-500">{dateLabel(day, { month: 'short', day: 'numeric' })}</span>
                     {isToday && <span className="rounded-full bg-orange-100 px-2 py-0.5 text-[10px] font-semibold text-orange-800 sm:mt-2 sm:block sm:w-fit">Today</span>}
                   </div>
-                  {tasks.length ? <div className="space-y-2">{tasks.map((task) => <button key={task.title} type="button" aria-haspopup="dialog" aria-expanded={selectedTaskTitle === task.title} onClick={() => toggleTaskDetails(task.title)} className={`flex min-h-11 w-full items-center justify-between gap-3 rounded-xl border px-3 py-2 text-left text-sm ${statusTone(task.status)}`}><span className="min-w-0 truncate font-medium">{task.title}</span><span className="shrink-0 text-xs">{task.status}</span></button>)}</div> : <p className="py-1 text-sm text-slate-400">No tasks due</p>}
+                  {tasks.length ? <div className="space-y-2">{tasks.map((task) => <button key={task.title} type="button" aria-haspopup="dialog" aria-expanded={selectedTaskTitle === task.title} onClick={() => toggleTaskDetails(task.title)} className={`flex min-h-11 w-full items-center justify-between gap-3 rounded-xl border border-l-2 px-3 py-2 text-left text-sm ${getTaskStatusVisual(task.status).badge} ${task.status === 'Done' ? 'border-l-emerald-600' : task.status === 'In progress' ? 'border-l-orange-600' : 'border-l-slate-500'}`}><span className={`min-w-0 truncate font-medium ${task.status === 'Done' ? 'line-through opacity-60' : ''}`}>{task.title}</span><span className="flex shrink-0 items-center gap-2"><TaskStatusBadge status={task.status} className="px-2 py-0.5 text-[10px]" /><TaskPriorityIndicator priority={task.priority} compact /></span></button>)}</div> : <p className="py-1 text-sm text-slate-400">No tasks due</p>}
                 </section>
               );
             })}
@@ -428,7 +449,10 @@ const CalendarView = () => {
             <button type="button" onClick={() => setSelectedTaskTitle('')} aria-label="Close task details" className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-lg text-slate-500 transition hover:bg-slate-100 hover:text-slate-800"><LuX aria-hidden="true" className="h-4 w-4" /></button>
           </div>
           <div className="mt-3 flex flex-wrap items-center justify-between gap-3 border-t border-slate-100 pt-3">
-            <span className={`rounded-full border px-2.5 py-1 text-xs font-medium ${statusTone(selectedTask.status)}`}>{selectedTask.status}</span>
+            <span className="flex flex-wrap items-center gap-2">
+              <TaskStatusBadge status={selectedTask.status} />
+              <TaskPriorityIndicator priority={selectedTask.priority} />
+            </span>
             <span className="text-xs text-slate-500">Due {dateLabel(selectedTask.due, { month: 'long', day: 'numeric', year: 'numeric' })}</span>
           </div>
         </div>
@@ -439,11 +463,15 @@ const CalendarView = () => {
 };
 
 const ReportsView = () => {
-  const statusCounts = [
-    { label: 'Completed', count: 2, color: 'bg-emerald-500' },
-    { label: 'In progress', count: 2, color: 'bg-amber-400' },
-    { label: 'To do', count: 3, color: 'bg-slate-400' },
-  ];
+  const statusCounts = taskStatusOrder.map((status) => ({
+    status,
+    count: demoTasks.filter((task) => getTaskStatusVisual(task.status).label === getTaskStatusVisual(status).label).length,
+  }));
+  const priorityCounts = Object.fromEntries(taskPriorityOrder.map((priority) => [
+    priority,
+    demoTasks.filter((task) => task.status !== 'Done' && task.priority.toLowerCase() === priority).length,
+  ]));
+  const maxPriority = Math.max(1, ...Object.values(priorityCounts));
   return (
     <div className="space-y-5">
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
@@ -454,8 +482,24 @@ const ReportsView = () => {
       <div className="grid gap-5 xl:grid-cols-2">
         <article className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm sm:p-6">
           <h2 className="font-semibold text-slate-900">Work by status</h2><p className="mt-1 text-sm text-slate-500">A quick view of this sample workspace</p>
-          <div className="mt-6 flex h-3 overflow-hidden rounded-full bg-slate-100">{statusCounts.map((item) => <span key={item.label} className={item.color} style={{ width: `${(item.count / 7) * 100}%` }} />)}</div>
-          <div className="mt-5 space-y-4">{statusCounts.map((item) => <div key={item.label} className="flex items-center gap-3"><span className={`h-2.5 w-2.5 rounded-full ${item.color}`} /><span className="flex-1 text-sm text-slate-600">{item.label}</span><span className="text-sm font-semibold text-slate-900">{item.count}</span><span className="w-10 text-right text-xs text-slate-400">{Math.round((item.count / 7) * 100)}%</span></div>)}</div>
+          <div className="mt-6 flex h-3 overflow-hidden rounded-full bg-slate-100">{statusCounts.map((item) => <span key={item.status} className={getTaskStatusVisual(item.status).bar} style={{ width: `${(item.count / demoTasks.length) * 100}%` }} />)}</div>
+          <div className="mt-5 space-y-4">{statusCounts.map((item) => <div key={item.status} className="flex items-center gap-3"><TaskStatusBadge status={item.status} /><span className="flex-1" /><span className="text-sm font-semibold text-slate-900">{item.count}</span><span className="w-10 text-right text-xs text-slate-400">{Math.round((item.count / demoTasks.length) * 100)}%</span></div>)}</div>
+          <div className="mt-6 border-t border-slate-100 pt-5">
+            <h3 className="font-semibold text-slate-900">Open work by priority</h3>
+            <div className="mt-4 space-y-4">
+              {taskPriorityOrder.map((priority) => (
+                <div key={priority}>
+                  <div className="mb-2 flex items-center justify-between">
+                    <TaskPriorityIndicator priority={priority} />
+                    <span className="text-sm font-semibold text-slate-900">{priorityCounts[priority]}</span>
+                  </div>
+                  <div className="h-2 overflow-hidden rounded-full bg-slate-100">
+                    <div className={`h-full rounded-full ${getTaskPriorityVisual(priority).bar}`} style={{ width: `${(priorityCounts[priority] / maxPriority) * 100}%` }} />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
         </article>
         <article className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm sm:p-6">
           <h2 className="font-semibold text-slate-900">Project momentum</h2><p className="mt-1 text-sm text-slate-500">A sample view of active work</p>

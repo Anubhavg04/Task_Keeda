@@ -19,7 +19,30 @@ export const getProjects = async (req, res) => {
       .populate('members', 'fullname email')
       .sort({ updatedAt: -1 });
 
-    res.json(projects);
+    const projectIds = projects.map((project) => project._id);
+    const taskSummaries = projectIds.length ? await Task.aggregate([
+      { $match: { project: { $in: projectIds }, isDeleted: { $ne: true } } },
+      {
+        $group: {
+          _id: '$project',
+          total: { $sum: 1 },
+          todo: { $sum: { $cond: [{ $eq: ['$status', 'todo'] }, 1, 0] } },
+          inProgress: { $sum: { $cond: [{ $eq: ['$status', 'in-progress'] }, 1, 0] } },
+          done: { $sum: { $cond: [{ $eq: ['$status', 'done'] }, 1, 0] } },
+          low: { $sum: { $cond: [{ $and: [{ $ne: ['$status', 'done'] }, { $eq: ['$priority', 'low'] }] }, 1, 0] } },
+          medium: { $sum: { $cond: [{ $and: [{ $ne: ['$status', 'done'] }, { $eq: ['$priority', 'medium'] }] }, 1, 0] } },
+          high: { $sum: { $cond: [{ $and: [{ $ne: ['$status', 'done'] }, { $eq: ['$priority', 'high'] }] }, 1, 0] } },
+          urgent: { $sum: { $cond: [{ $and: [{ $ne: ['$status', 'done'] }, { $eq: ['$priority', 'urgent'] }] }, 1, 0] } },
+        },
+      },
+    ]) : [];
+    const summaryByProject = new Map(taskSummaries.map((summary) => [String(summary._id), summary]));
+    const emptySummary = { total: 0, todo: 0, inProgress: 0, done: 0, low: 0, medium: 0, high: 0, urgent: 0 };
+
+    res.json(projects.map((project) => ({
+      ...project.toObject(),
+      taskSummary: summaryByProject.get(String(project._id)) || emptySummary,
+    })));
   } catch (error) {
     console.error('Failed to fetch projects:', error);
     res.status(500).json({ message: 'Failed to fetch projects' });
