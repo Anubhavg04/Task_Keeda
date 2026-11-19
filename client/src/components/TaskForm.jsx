@@ -210,7 +210,7 @@ const TaskForm = ({ task, onClose, onSaved, defaultProjectId = '' }) => {
               disabled={!formData.projectId}
               className={inputClass}
             >
-              <option value="">{formData.projectId ? 'Unassigned' : 'Choose a project first'}</option>
+              <option value="">{formData.projectId ? 'Unassigned' : 'Select a team workspace first'}</option>
               {projects.find((project) => project._id === formData.projectId)?.owner && (
                 <option value={projects.find((project) => project._id === formData.projectId).owner._id}>
                   {projects.find((project) => project._id === formData.projectId).owner.fullname} · Owner
