@@ -2,10 +2,14 @@ import React, { lazy, Suspense, useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import { Analytics } from '@vercel/analytics/react';
+import Clarity from '@microsoft/clarity';
 import { LuCircleAlert, LuCircleCheck } from 'react-icons/lu';
 import { AuthProvider } from './context/AuthContext.jsx';
 import Layout from './components/Layout.jsx';
 import ProtectedRoute from './utils/ProtectedRoute.jsx';
+
+const clarityProjectId = import.meta.env.VITE_CLARITY_PROJECT_ID;
+if (clarityProjectId) Clarity.init(clarityProjectId);
 
 const DemoWorkspace = lazy(() => import('./components/DemoWorkspace.jsx'));
 const LandingPage = lazy(() => import('./pages/LandingPage.jsx'));
