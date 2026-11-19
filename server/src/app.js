@@ -13,6 +13,23 @@ app.use((req, res, next) => {
     res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
     next();
 });
+app.use((req, res, next) => {
+    const startedAt = process.hrtime.bigint();
+    res.once('finish', () => {
+        const durationMs = Math.round(Number(process.hrtime.bigint() - startedAt) / 1e6);
+        if (req.path.startsWith('/api/') && durationMs >= 300) {
+            const path = req.path.replace(/\/[a-f\d]{24}(?=\/|$)/gi, '/:id');
+            console.warn(JSON.stringify({
+                event: 'slow_api_request',
+                method: req.method,
+                path,
+                status: res.statusCode,
+                durationMs,
+            }));
+        }
+    });
+    next();
+});
 app.use(express.json({ limit: '1mb' }));
 app.use(cookieParser());
 app.use(express.urlencoded({extended:true}))
