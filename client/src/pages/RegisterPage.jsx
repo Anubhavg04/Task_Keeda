@@ -54,9 +54,9 @@ const RegisterPage = () => {
   return (
     <AuthShell
       variant="signup"
-      eyebrow="Your next chapter"
-      title="Make space for your best work."
-      description="Create your account and bring tasks, projects, and your team into one clear workspace."
+      eyebrow="Start with a clear plan"
+      title="Bring your work into focus."
+      description="Create your account to organize personal tasks, bring projects together, and keep the next step visible."
     >
       <form onSubmit={handleSubmit} className="rounded-[1.4rem] border border-stone-200/80 bg-white p-5 shadow-[0_24px_70px_-35px_rgba(54,44,31,0.28)] ring-1 ring-black/[0.02] md:p-8">
         <div className="space-y-5">
@@ -158,9 +158,9 @@ const RegisterPage = () => {
           <button
             type="submit"
             disabled={loading}
-            className="group mt-1 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#bd4317] px-4 py-3.5 text-sm font-semibold text-white shadow-[0_8px_20px_-10px_rgba(189,67,23,0.8)] transition hover:bg-[#a83712] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange-700 disabled:cursor-not-allowed disabled:opacity-60"
+            className="group mt-1 inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-orange-700 px-4 py-3.5 text-sm font-semibold text-white shadow-lg shadow-orange-700/20 transition hover:bg-orange-800 hover:shadow-xl active:scale-[0.99] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange-700 disabled:cursor-not-allowed disabled:opacity-60"
           >
-            {loading ? 'Creating your account...' : 'Create your free account'}
+            {loading ? 'Creating your account...' : 'Create free account'}
             {!loading && <LuArrowRight aria-hidden="true" className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />}
           </button>
         </div>

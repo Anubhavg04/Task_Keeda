@@ -21,6 +21,7 @@ import {
 import { useAuth } from '../context/useAuth.js';
 import { projectAPI } from '../services/api.js';
 import TaskFlowLogo from './TaskFlowLogo.jsx';
+import MarketingSectionLink from './MarketingSectionLink.jsx';
 import CommandPalette from './CommandPalette.jsx';
 import NotificationBell from './NotificationBell.jsx';
 
@@ -84,6 +85,7 @@ const Layout = ({ children }) => {
   const [logoutError, setLogoutError] = useState('');
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
+  const [publicMenuOpen, setPublicMenuOpen] = useState(false);
   const [projects, setProjects] = useState([]);
   const [projectsError, setProjectsError] = useState('');
   const [workspaceMenuOpen, setWorkspaceMenuOpen] = useState(false);
@@ -156,6 +158,15 @@ const Layout = ({ children }) => {
     };
   }, [mobileNavOpen]);
 
+  useEffect(() => {
+    if (!publicMenuOpen) return undefined;
+    const closeOnEscape = (event) => {
+      if (event.key === 'Escape') setPublicMenuOpen(false);
+    };
+    window.addEventListener('keydown', closeOnEscape);
+    return () => window.removeEventListener('keydown', closeOnEscape);
+  }, [publicMenuOpen]);
+
   const handleLogout = async () => {
     setLogoutError('');
     try {
@@ -187,23 +198,49 @@ const Layout = ({ children }) => {
     return (
       <div className="min-h-screen bg-[#faf8f4] text-slate-900">
         <header className="border-b border-slate-200/80 bg-white">
-          <div className="mx-auto flex h-[72px] max-w-7xl items-center justify-between px-5 sm:px-8">
-            <Link to="/" aria-label="TaskFlow home" className="rounded-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-orange-700">
-              <TaskFlowLogo />
+          <div className="mx-auto flex h-[68px] max-w-7xl items-center justify-between px-3 sm:h-[72px] sm:px-8">
+            <Link to="/" aria-label="TaskFlow home" onClick={() => setPublicMenuOpen(false)} className="rounded-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-orange-700">
+              <TaskFlowLogo markClassName="h-7 w-7 sm:h-9 sm:w-9" textClassName="text-lg sm:text-xl" />
             </Link>
-            <div className="flex items-center gap-3">
-              <span className="hidden text-sm text-slate-500 sm:inline">{isRegisterPage ? 'Already a member?' : 'New to TaskFlow?'}</span>
-              <Link
-                to={isRegisterPage ? '/login' : '/register'}
-                className={`rounded-lg px-4 py-2.5 text-sm font-semibold transition ${
-                  isRegisterPage
-                    ? 'border border-stone-200 bg-white text-slate-700 hover:bg-stone-50'
-                    : 'bg-orange-700 text-white shadow-sm shadow-orange-200 hover:bg-orange-800'
-                }`}
+            <div className="flex items-center gap-2 sm:gap-5">
+              <nav aria-label="Public navigation" className="hidden items-center gap-3 md:flex lg:gap-5">
+                <MarketingSectionLink sectionId="product-preview" className="rounded-lg px-2 py-2.5 text-sm font-medium hover:bg-slate-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange-700">Product</MarketingSectionLink>
+                <MarketingSectionLink sectionId="features" className="rounded-lg px-2 py-2.5 text-sm font-medium hover:bg-slate-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange-700">Features</MarketingSectionLink>
+              </nav>
+              <div className="hidden items-center gap-3 md:flex">
+                <Link to="/login" aria-current={location.pathname === '/login' ? 'page' : undefined} className="inline-flex min-h-11 items-center justify-center rounded-lg px-2.5 text-sm font-semibold text-slate-600 transition hover:bg-slate-50 hover:text-slate-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange-700 sm:px-3">
+                  Sign in
+                </Link>
+                <Link to="/register" aria-current={isRegisterPage ? 'page' : undefined} className="inline-flex min-h-11 whitespace-nowrap items-center justify-center gap-2 rounded-xl bg-orange-700 px-3 py-2 text-sm font-semibold text-white shadow-sm shadow-orange-200 transition duration-150 hover:bg-orange-800 hover:shadow-md active:scale-[0.98] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange-700 sm:min-h-12 sm:px-4 sm:py-3 sm:shadow-lg sm:shadow-orange-700/20">
+                  Create account
+                </Link>
+              </div>
+              <button
+                type="button"
+                onClick={() => setPublicMenuOpen((open) => !open)}
+                aria-label={publicMenuOpen ? 'Close navigation menu' : 'Open navigation menu'}
+                aria-expanded={publicMenuOpen}
+                aria-controls="public-mobile-navigation"
+                className="inline-flex h-11 w-11 items-center justify-center rounded-lg text-slate-600 transition hover:bg-orange-50 hover:text-orange-800 active:scale-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-orange-700 md:hidden"
               >
-                {isRegisterPage ? 'Sign in' : 'Create account'}
-              </Link>
+                {publicMenuOpen
+                  ? <LuX aria-hidden="true" className="h-5 w-5" />
+                  : <LuMenu aria-hidden="true" className="h-5 w-5" />}
+              </button>
             </div>
+          </div>
+          <div
+            id="public-mobile-navigation"
+            aria-hidden={!publicMenuOpen}
+            inert={!publicMenuOpen}
+            className={`overflow-hidden transition-[max-height,opacity] duration-200 ease-out md:hidden ${publicMenuOpen ? 'max-h-64 opacity-100' : 'max-h-0 opacity-0'}`}
+          >
+            <nav aria-label="Public mobile navigation" className="space-y-1 border-t border-slate-100 px-3 py-3">
+              <MarketingSectionLink sectionId="product-preview" onClick={() => setPublicMenuOpen(false)} className="flex min-h-11 items-center rounded-lg px-3 text-sm font-medium hover:bg-slate-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange-700">Product</MarketingSectionLink>
+              <MarketingSectionLink sectionId="features" onClick={() => setPublicMenuOpen(false)} className="flex min-h-11 items-center rounded-lg px-3 text-sm font-medium hover:bg-slate-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange-700">Features</MarketingSectionLink>
+              <Link to="/login" onClick={() => setPublicMenuOpen(false)} aria-current={location.pathname === '/login' ? 'page' : undefined} className="flex min-h-11 items-center rounded-lg px-3 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-50 hover:text-orange-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange-700">Sign in</Link>
+              <Link to="/register" onClick={() => setPublicMenuOpen(false)} aria-current={isRegisterPage ? 'page' : undefined} className="flex min-h-11 items-center justify-center rounded-lg bg-orange-700 px-3 text-sm font-semibold text-white shadow-sm transition hover:bg-orange-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange-700">Create account</Link>
+            </nav>
           </div>
         </header>
         <main className={isAuthPage ? 'w-full' : 'mx-auto max-w-7xl px-5 sm:px-8'}>{children}</main>
