@@ -5,7 +5,9 @@ import toast from 'react-hot-toast';
 import { LuFolderPlus, LuPlus } from 'react-icons/lu';
 import { useAuth } from '../context/useAuth.js';
 import { discussionAPI, projectAPI } from '../services/api.js';
-import { EmptyState, ErrorState, PageHeading, ProjectsCardsSkeleton, buttonPrimary, inputClass } from '../components/WorkspaceUI.jsx';
+import { EmptyState, ErrorState, PageHeading, ProjectsCardsSkeleton, sectionHeadingClass, buttonPrimary, inputClass } from '../components/WorkspaceUI.jsx';
+import { taskPriorityOrder, taskStatusOrder } from '../utils/taskVisuals.js';
+import { TaskPriorityIndicator, TaskStatusBadge } from '../components/TaskVisuals.jsx';
 
 const colors = {
   orange: { edge: 'border-t-orange-500', badge: 'bg-orange-50 text-orange-700', dot: 'bg-orange-500', button: 'text-orange-700 hover:bg-orange-50' },
@@ -153,7 +155,7 @@ const ProjectsPage = () => {
   };
 
   return (
-    <div className="py-7 sm:py-9">
+    <div className="py-6 sm:py-8">
       <PageHeading
         eyebrow="Work, together"
         title="Team workspaces"
@@ -162,10 +164,10 @@ const ProjectsPage = () => {
       />
 
       {showCreate && (
-        <form onSubmit={handleCreate} className="mb-7 rounded-2xl border border-orange-100 bg-white p-5 shadow-sm sm:p-6">
-          <div className="mb-5">
-            <h2 className="font-semibold text-slate-900">Create a team workspace</h2>
-            <p className="mt-1 text-sm text-slate-500">A shared home for a team, client, campaign, or initiative.</p>
+        <form onSubmit={handleCreate} className="mb-6 rounded-2xl border border-orange-100 bg-white p-4 shadow-sm sm:p-5">
+          <div className="mb-4">
+            <h2 className={sectionHeadingClass}>Create a team workspace</h2>
+            <p className="mt-1 text-sm leading-6 text-slate-500">A shared home for a team, client, campaign, or initiative.</p>
           </div>
           <div className="grid gap-4 md:grid-cols-2">
             <label className="text-sm font-medium text-slate-700">
@@ -194,28 +196,52 @@ const ProjectsPage = () => {
       {error ? null : loading ? <ProjectsCardsSkeleton /> : projects.length === 0 ? (
         <EmptyState icon={LuFolderPlus} title="No projects yet" description="Create a team workspace to bring people, tasks, and reference notes together. You can invite registered TaskFlow users after creating it." action={<button type="button" onClick={() => setShowCreate(true)} className={`${buttonPrimary} min-h-11 w-full md:w-auto`}>Create your first project</button>} />
       ) : (
-        <section aria-label="Projects" className="grid gap-5 md:grid-cols-2 2xl:grid-cols-3">
+        <section aria-label="Projects" className="grid gap-4 md:grid-cols-2 2xl:grid-cols-3">
           {projects.map((project) => {
             const theme = colors[project.color] || colors.orange;
             const isOwner = String(project.owner?._id) === String(user?._id || user?.id);
             const team = [project.owner, ...(project.members || [])].filter(Boolean);
             const discussionSummary = discussionSummaries[String(project._id)];
             const unreadCount = discussionSummary?.unreadCount || 0;
+            const taskSummary = project.taskSummary || { total: 0, todo: 0, inProgress: 0, done: 0 };
+            const highestOpenPriority = taskPriorityOrder.find((priority) => (taskSummary[priority] || 0) > 0);
             return (
-              <article key={project._id} className={`overflow-hidden rounded-2xl border border-slate-200/80 border-t-[3px] ${theme.edge} bg-white shadow-sm shadow-slate-200/30`}>
-                <div className="p-4 md:p-6">
+              <article key={project._id} className={`overflow-hidden rounded-2xl border border-slate-200/80 border-t-[3px] ${theme.edge} bg-white shadow-sm shadow-slate-200/30 transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-md hover:shadow-slate-300/40 motion-reduce:transform-none`}>
+                <div className="p-4 md:p-5">
                   <div className="flex items-start gap-3">
                     <span className={`mt-0.5 h-3 w-3 shrink-0 rounded-full ${theme.dot}`} />
                     <div className="min-w-0 flex-1">
-                      <h2 className="truncate text-lg font-bold text-slate-900">{project.name}</h2>
-                      <span className={`mt-2 inline-flex rounded-full px-2.5 py-1 text-[11px] font-semibold ${theme.badge}`}>{isOwner ? 'Owner' : 'Member'}</span>
+                      <h2 className="truncate text-base font-semibold leading-6 tracking-tight text-slate-900 sm:text-lg">{project.name}</h2>
+                      <span className={`mt-1.5 inline-flex rounded-full px-2.5 py-1 text-[11px] font-semibold ${theme.badge}`}>{isOwner ? 'Owner' : 'Member'}</span>
                     </div>
                     {isOwner && (
-                      <button type="button" onClick={() => handleDeleteProject(project)} disabled={busyProject === project._id} aria-label={`Delete ${project.name}`} title="Delete project" className="min-h-11 min-w-11 rounded-lg px-2 py-1 text-xs font-medium text-slate-400 transition hover:bg-rose-50 hover:text-rose-600 disabled:opacity-50 md:min-h-0 md:min-w-0">Delete</button>
+                      <button type="button" onClick={() => handleDeleteProject(project)} disabled={busyProject === project._id} aria-label={`Delete ${project.name}`} title="Delete project" className="min-h-11 min-w-11 rounded-lg px-2 py-1 text-xs font-medium text-slate-400 transition hover:bg-rose-50 hover:text-rose-600 active:scale-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-orange-600 disabled:opacity-50 md:min-h-0 md:min-w-0">Delete</button>
                     )}
                   </div>
-                  <p className="mt-4 min-h-10 text-sm leading-6 text-slate-500">{project.description || 'A shared space to organize work and keep the team moving.'}</p>
-                  <div className="mt-5 border-t border-slate-100 pt-4">
+                  <p className="mt-3 min-h-10 text-sm leading-6 text-slate-500">{project.description || 'A shared space to organize work and keep the team moving.'}</p>
+                  <div className="mt-3 rounded-xl bg-slate-50 p-3 dark:bg-slate-900">
+                    <div className="mb-2 flex items-center justify-between gap-2">
+                      <span className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">Task status</span>
+                      <span className="text-xs text-slate-500">{taskSummary.total || 0} tasks</span>
+                    </div>
+                    <div className="flex flex-wrap gap-1.5">
+                      {taskStatusOrder.map((status) => (
+                        <TaskStatusBadge
+                          key={status}
+                          status={status}
+                          count={taskSummary[status === 'in-progress' ? 'inProgress' : status] || 0}
+                          className="px-2 py-0.5 text-[10px]"
+                        />
+                      ))}
+                    </div>
+                    <div className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-slate-200 pt-2 dark:border-slate-700">
+                      <span className="text-xs font-medium text-slate-500">Highest open priority</span>
+                      {highestOpenPriority
+                        ? <TaskPriorityIndicator priority={highestOpenPriority} count={taskSummary[highestOpenPriority]} />
+                        : <span className="text-xs text-slate-500">No open tasks</span>}
+                    </div>
+                  </div>
+                  <div className="mt-4 border-t border-slate-100 pt-3">
                     <div className="mb-3 flex items-center justify-between">
                       <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">Team · {team.length}</span>
                       <div className="flex -space-x-2">
@@ -242,10 +268,10 @@ const ProjectsPage = () => {
                     <form className="mt-4 flex flex-col gap-2 md:flex-row" onSubmit={(event) => { event.preventDefault(); handleInvite(project); }}>
                       <label className="sr-only" htmlFor={`invite-${project._id}`}>Invite by email</label>
                       <input id={`invite-${project._id}`} type="email" required maxLength={254} value={memberEmails[project._id] || ''} onChange={(event) => setMemberEmails((current) => ({ ...current, [project._id]: event.target.value }))} placeholder="Add teammate by email" className="min-h-11 min-w-0 flex-1 rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 focus:border-orange-400 focus:outline-none focus:ring-4 focus:ring-orange-50 md:text-xs" />
-                      <button type="submit" disabled={busyProject === project._id} className="min-h-11 rounded-lg bg-slate-900 px-3 py-2 text-sm font-semibold text-white transition hover:bg-slate-700 disabled:opacity-50 md:min-h-0 md:text-xs">{busyProject === project._id ? 'Adding...' : 'Invite'}</button>
+                      <button type="submit" disabled={busyProject === project._id} className="min-h-11 rounded-lg bg-slate-900 px-3 py-2 text-sm font-semibold text-white transition hover:bg-slate-700 active:scale-[0.98] focus-visible:outline focus-visible:outline-2 focus-visible:outline-orange-600 disabled:opacity-50 md:min-h-0 md:text-xs">{busyProject === project._id ? 'Adding...' : 'Invite'}</button>
                     </form>
                   )}
-                  <div className="mt-5 grid grid-cols-2 gap-2 border-t border-slate-100 pt-4 md:flex">
+                  <div className="mt-4 grid grid-cols-2 gap-2 border-t border-slate-100 pt-3 md:flex">
                     <Link to={`/tasks?projectId=${project._id}`} className={`flex min-h-11 items-center justify-center rounded-lg px-2 py-2 text-center text-xs font-semibold transition md:flex-1 ${theme.button}`}>View tasks</Link>
                     <Link to={`/projects/${project._id}/chat`} title={discussionSummary?.lastMessage?.content || 'Open team chat'} className="flex min-h-11 items-center justify-center gap-1.5 rounded-lg bg-orange-50 px-2 py-2 text-center text-xs font-semibold text-orange-800 transition hover:bg-orange-100 md:flex-1">
                       Team chat
