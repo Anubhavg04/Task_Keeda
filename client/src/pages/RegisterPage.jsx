@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { LuArrowRight, LuEye, LuEyeOff, LuLockKeyhole, LuMail, LuUserRound } from 'react-icons/lu';
+import { track } from '@vercel/analytics';
+import Clarity from '@microsoft/clarity';
 import { useAuth } from '../context/useAuth.js';
 import AuthShell from '../components/AuthShell.jsx';
 import toast from 'react-hot-toast';
@@ -42,6 +44,10 @@ const RegisterPage = () => {
 
     try {
       await register(formData.fullname, formData.email, formData.password);
+      track('Registration Completed');
+      if (import.meta.env.VITE_CLARITY_PROJECT_ID) {
+        Clarity.event('registration_completed');
+      }
       toast.success('Registration successful! Please login.');
       navigate('/login');
     } catch (error) {
