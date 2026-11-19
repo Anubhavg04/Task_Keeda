@@ -1,9 +1,9 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import { LuPlus, LuX } from 'react-icons/lu';
+import { LuNotebookPen, LuPlus, LuX } from 'react-icons/lu';
 import { noteAPI, projectAPI } from '../services/api.js';
-import { EmptyState, ErrorState, LoadingState, PageHeading, buttonPrimary, inputClass } from '../components/WorkspaceUI.jsx';
+import { EmptyState, ErrorState, NotesGridSkeleton, PageHeading, buttonPrimary, inputClass } from '../components/WorkspaceUI.jsx';
 
 const blankNote = { title: '', content: '', projectId: '' };
 
@@ -124,7 +124,7 @@ const NotesPage = () => {
       </div>
 
       {error && <div className="mb-5"><ErrorState message={error} onRetry={loadData} /></div>}
-      {error ? null : loading ? <LoadingState label="Loading your notes..." /> : (
+      {error ? null : loading ? <NotesGridSkeleton /> : (
         <>
           {editingId === 'new' && (
             <form onSubmit={handleSave} className="mb-5 rounded-2xl border border-orange-200 bg-white p-5 shadow-sm sm:p-6">
@@ -153,7 +153,7 @@ const NotesPage = () => {
           )}
 
           {visibleNotes.length === 0 ? (
-            <EmptyState title={search ? 'No matching notes' : "A space for your team's knowledge"} description={search ? 'Try another search phrase, or clear the search field.' : 'Write a quick idea, capture a project decision, or save details your team can use later.'} action={!search && <button type="button" onClick={startCreate} className={buttonPrimary}>Write a note</button>} />
+            <EmptyState icon={LuNotebookPen} title={search ? 'No matching notes' : 'No notes yet'} description={search ? 'Try another search phrase, or clear the search field.' : 'Write a quick idea, capture a project decision, or save details your team can use later.'} action={!search && <button type="button" onClick={startCreate} className={buttonPrimary}><LuPlus aria-hidden="true" className="h-4 w-4" />Create your first note</button>} />
           ) : (
             <section aria-label="Notes" className="grid gap-4 md:grid-cols-2 2xl:grid-cols-3">
               {visibleNotes.map((note) => (

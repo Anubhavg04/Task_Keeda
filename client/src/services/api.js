@@ -1,6 +1,8 @@
 import axios from 'axios';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || '/api';
+const USER_SESSION_KEY = 'taskflow.user-session';
+const USER_SESSION_TTL = 5 * 60 * 1000;
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -10,13 +12,70 @@ const api = axios.create({
   },
 });
 
-// Add response interceptor to handle auth errors gracefully
+export const getCachedUserSession = () => {
+  if (typeof window === 'undefined') return null;
+  try {
+    const cached = JSON.parse(window.sessionStorage.getItem(USER_SESSION_KEY) || 'null');
+    if (!cached?.user || !Number.isFinite(cached.cachedAt) || Date.now() - cached.cachedAt >= USER_SESSION_TTL) {
+      window.sessionStorage.removeItem(USER_SESSION_KEY);
+      return null;
+    }
+    return cached.user;
+  } catch {
+    return null;
+  }
+};
+
+export const cacheUserSession = (user) => {
+  if (typeof window === 'undefined') return;
+  try {
+    window.sessionStorage.setItem(USER_SESSION_KEY, JSON.stringify({ user, cachedAt: Date.now() }));
+  } catch {
+    // Session caching is best-effort; cookie authentication remains authoritative.
+  }
+};
+
+export const clearCachedUserSession = () => {
+  if (typeof window === 'undefined') return;
+  try {
+    window.sessionStorage.removeItem(USER_SESSION_KEY);
+  } catch {
+    // Session caching is best-effort; cookie authentication remains authoritative.
+  }
+};
+
+let requestSequence = 0;
+const clearSlowRequestTimer = (config) => {
+  if (!config?._slowRequestTimer) return;
+  window.clearTimeout(config._slowRequestTimer);
+  window.dispatchEvent(new CustomEvent('taskflow:api-request-settled', {
+    detail: { id: config._slowRequestId },
+  }));
+};
+
+api.interceptors.request.use((config) => {
+  config._slowRequestId = `${Date.now()}-${requestSequence += 1}`;
+  config._slowRequestTimer = window.setTimeout(() => {
+    window.dispatchEvent(new CustomEvent('taskflow:api-request-slow', {
+      detail: { id: config._slowRequestId },
+    }));
+  }, 1800);
+  return config;
+});
+
 api.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    clearSlowRequestTimer(response.config);
+    return response;
+  },
   (error) => {
-    // Don't show errors for auth check failures
-    if (error.config?.url === '/users/user' && error.response?.status === 401) {
-      return Promise.reject(error);
+    clearSlowRequestTimer(error.config);
+    if (error.response?.status === 401) {
+      clearCachedUserSession();
+      const url = error.config?.url || '';
+      if (!url.startsWith('/auth/login') && !url.startsWith('/auth/register') && !url.startsWith('/auth/logout')) {
+        window.dispatchEvent(new Event('taskflow:auth-unauthorized'));
+      }
     }
     return Promise.reject(error);
   }

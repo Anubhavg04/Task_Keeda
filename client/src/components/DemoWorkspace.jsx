@@ -21,6 +21,7 @@ import {
   LuRotateCcw,
   LuTarget,
   LuUsersRound,
+  LuX,
 } from 'react-icons/lu';
 
 const navigation = [
@@ -83,7 +84,7 @@ const DemoMetric = ({ label, value, caption, icon, tone }) => (
 );
 
 const JoinCard = ({ title = 'Ready to make this workspace yours?', description = 'Create an account to add your work, invite your team, and keep everything in sync.' }) => (
-  <aside className="flex flex-col gap-4 rounded-2xl bg-[#1e2b25] p-5 text-white sm:flex-row sm:items-center sm:justify-between sm:p-6">
+  <aside className="flex flex-col gap-4 rounded-2xl bg-[#1e2b25] p-5 text-white md:flex-row md:items-center md:justify-between md:p-6">
     <div>
       <p className="text-xs font-semibold uppercase tracking-[0.15em] text-orange-300">Like what you see?</p>
       <h2 className="mt-2 text-lg font-semibold">{title}</h2>
@@ -94,6 +95,39 @@ const JoinCard = ({ title = 'Ready to make this workspace yours?', description =
     </Link>
   </aside>
 );
+
+const DemoSignupPrompt = ({ message, onClose }) => {
+  useEffect(() => {
+    const closeOnEscape = (event) => {
+      if (event.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', closeOnEscape);
+    return () => window.removeEventListener('keydown', closeOnEscape);
+  }, [onClose]);
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/40 p-4" onClick={onClose}>
+      <section
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="demo-signup-title"
+        className="w-full max-w-sm rounded-2xl border border-slate-200 bg-white p-6 shadow-xl"
+        onClick={(event) => event.stopPropagation()}
+      >
+        <h2 id="demo-signup-title" className="text-lg font-semibold text-slate-900">Keep your work moving</h2>
+        <p className="mt-2 text-sm leading-6 text-slate-600">{message}</p>
+        <div className="mt-5 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+          <button type="button" onClick={onClose} className="inline-flex items-center justify-center rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">
+            Keep exploring
+          </button>
+          <Link to="/register" className="inline-flex items-center justify-center rounded-lg bg-orange-700 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-orange-800">
+            Create account
+          </Link>
+        </div>
+      </section>
+    </div>
+  );
+};
 
 const DemoTaskRow = ({ task }) => (
   <li className="flex items-center gap-3 border-b border-slate-100 px-4 py-3.5 last:border-0 sm:px-5">
@@ -150,6 +184,7 @@ const FocusSprint = () => {
   const progress = ((duration * 60 - secondsRemaining) / (duration * 60)) * 100;
   const sprintComplete = secondsRemaining === 0;
   const sprintRunning = running && secondsRemaining > 0;
+  const sprintPaused = !running && secondsRemaining < duration * 60 && secondsRemaining > 0;
 
   const toggleSprint = () => {
     if (sprintRunning) {
@@ -159,6 +194,11 @@ const FocusSprint = () => {
     if (secondsRemaining === 0) setSecondsRemaining(duration * 60);
     setRunning(true);
   };
+  const sprintActionLabel = sprintComplete
+    ? 'Restart focus sprint'
+    : secondsRemaining < duration * 60
+      ? 'Resume focus sprint'
+      : 'Start focus sprint';
 
   return (
     <article className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm shadow-slate-200/20">
@@ -175,26 +215,26 @@ const FocusSprint = () => {
           {demoTasks.filter((task) => task.status !== 'Done').map((task) => <option key={task.title} value={task.title}>{task.title}</option>)}
         </select>
       </label>
-      <div className="mt-5 flex items-center justify-between gap-3">
+      <div className="mt-5 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
         <div aria-live="polite">
-          <p className="font-mono text-4xl font-semibold tracking-tight text-slate-900">{minutes}:{seconds}</p>
-          <p className="mt-1 text-xs text-slate-500">{sprintComplete ? 'Sprint complete. Nice work.' : sprintRunning ? 'One thing at a time.' : 'Pick a pace and get started.'}</p>
+          <p className={`font-mono text-4xl font-semibold tracking-tight transition-colors duration-300 ${sprintComplete ? 'text-emerald-700' : 'text-slate-900'}`}>{minutes}:{seconds}</p>
+          <p className="mt-1 text-xs text-slate-500">{sprintComplete ? 'Sprint complete. Nice work.' : sprintRunning ? 'One thing at a time.' : sprintPaused ? "Paused. Resume when you're ready." : 'Pick a pace and get started.'}</p>
         </div>
         <div className="flex items-center gap-2">
-          <button type="button" onClick={toggleSprint} aria-label={sprintRunning ? 'Pause focus sprint' : 'Start focus sprint'} className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-orange-700 text-white transition hover:bg-orange-800">
+          <button type="button" onClick={toggleSprint} aria-label={sprintRunning ? 'Pause focus sprint' : sprintActionLabel} className={`inline-flex h-11 w-11 items-center justify-center rounded-xl text-white transition-all duration-300 ease-in-out active:scale-95 md:h-10 md:w-10 ${sprintRunning ? 'bg-orange-800 hover:bg-orange-900' : 'bg-orange-700 hover:bg-orange-800'}`}>
             {sprintRunning ? <LuPause aria-hidden="true" className="h-4 w-4" /> : <LuPlay aria-hidden="true" className="h-4 w-4" />}
           </button>
-          <button type="button" onClick={() => { setSecondsRemaining(duration * 60); setRunning(false); }} aria-label="Reset focus sprint" className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 text-slate-500 transition hover:bg-slate-50">
+          <button type="button" onClick={() => { setSecondsRemaining(duration * 60); setRunning(false); }} aria-label="Reset focus sprint" className="inline-flex h-11 w-11 items-center justify-center rounded-xl border border-slate-200 text-slate-500 transition hover:bg-slate-50 md:h-10 md:w-10">
             <LuRotateCcw aria-hidden="true" className="h-4 w-4" />
           </button>
         </div>
       </div>
-      <div className="mt-4 h-1.5 overflow-hidden rounded-full bg-slate-100"><div className="h-full rounded-full bg-orange-600 transition-[width] duration-500" style={{ width: `${progress}%` }} /></div>
-      <div className="mt-3 flex items-center gap-2" aria-label="Focus sprint length">
+      <div className="mt-4 h-1.5 overflow-hidden rounded-full bg-slate-100"><div className={`h-full rounded-full transition-[width,background-color] duration-500 ${sprintComplete ? 'bg-emerald-600' : 'bg-orange-600'}`} style={{ width: `${progress}%` }} /></div>
+      <div className="mt-3 flex flex-wrap items-center gap-2" aria-label="Focus sprint length">
         {[15, 25, 45].map((option) => (
-          <button type="button" key={option} onClick={() => setSprintDuration(option)} disabled={running} aria-pressed={duration === option} className={`rounded-full px-3 py-1.5 text-xs font-semibold transition disabled:cursor-not-allowed disabled:opacity-50 ${duration === option ? 'bg-orange-50 text-orange-800' : 'text-slate-400 hover:bg-slate-50 hover:text-slate-700'}`}>{option} min</button>
+          <button type="button" key={option} onClick={() => setSprintDuration(option)} aria-pressed={duration === option} className={`min-h-11 rounded-full px-3 py-1.5 text-xs font-semibold transition-colors duration-300 md:min-h-0 ${duration === option ? 'bg-orange-50 text-orange-800' : 'text-slate-400 hover:bg-slate-50 hover:text-slate-700'}`}>{option} min</button>
         ))}
-        <Link to="/register" className="ml-auto text-[11px] font-semibold text-orange-800 hover:text-orange-950">Save your progress</Link>
+        <Link to="/register" className="flex min-h-11 basis-full items-center justify-end text-[11px] font-semibold text-orange-800 hover:text-orange-950 md:ml-auto md:min-h-0 md:basis-auto">Save your progress</Link>
       </div>
     </article>
   );
@@ -228,7 +268,7 @@ const Dashboard = () => (
   </div>
 );
 
-const TasksView = () => {
+const TasksView = ({ onRestrictedAction }) => {
   const [query, setQuery] = useState('');
   const [status, setStatus] = useState('');
   const filteredTasks = demoTasks.filter((task) => (
@@ -238,7 +278,7 @@ const TasksView = () => {
 
   return (
     <div className="space-y-5">
-      <div className="flex flex-col gap-3 rounded-2xl border border-slate-200/80 bg-white p-4 shadow-sm sm:flex-row">
+      <div className="flex flex-col gap-3 rounded-2xl border border-slate-200/80 bg-white p-4 md:flex-row">
         <label className="relative min-w-0 flex-1">
           <span className="sr-only">Search demo tasks</span>
           <LuSearch aria-hidden="true" className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
@@ -250,7 +290,7 @@ const TasksView = () => {
             <option value="">All statuses</option><option>To do</option><option>In progress</option><option>Done</option>
           </select>
         </label>
-        <Link to="/register" className="inline-flex items-center justify-center gap-2 rounded-lg bg-orange-700 px-4 py-2.5 text-sm font-semibold text-white"><LuPlus aria-hidden="true" className="h-4 w-4" />Create task</Link>
+        <button type="button" onClick={() => onRestrictedAction('Create your free account to add real tasks')} className="inline-flex items-center justify-center gap-2 rounded-lg bg-orange-700 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-orange-800"><LuPlus aria-hidden="true" className="h-4 w-4" />Create task</button>
       </div>
       <div className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm">
         <div className="border-b border-slate-100 px-5 py-4"><h2 className="font-semibold text-slate-900">Sample tasks</h2><p className="mt-1 text-xs text-slate-500">Filter and explore the demo data. Sign up to manage your own.</p></div>
@@ -295,44 +335,104 @@ const NotesView = () => {
 };
 
 const CalendarView = () => {
-  const [month, setMonth] = useState(() => new Date(new Date().getFullYear(), new Date().getMonth(), 1));
-  const days = useMemo(() => {
-    const first = new Date(month.getFullYear(), month.getMonth(), 1);
+  const [activeDate, setActiveDate] = useState(() => new Date());
+  const [view, setView] = useState('month');
+  const [selectedTaskTitle, setSelectedTaskTitle] = useState('');
+  const start = useMemo(() => {
+    const first = view === 'month'
+      ? new Date(activeDate.getFullYear(), activeDate.getMonth(), 1)
+      : new Date(activeDate);
     first.setDate(first.getDate() - first.getDay());
-    return Array.from({ length: 42 }, (_, index) => {
-      const date = new Date(first);
-      date.setDate(first.getDate() + index);
+    return first;
+  }, [activeDate, view]);
+  const days = useMemo(() => Array.from({ length: view === 'month' ? 42 : 7 }, (_, index) => {
+      const date = new Date(start);
+      date.setDate(start.getDate() + index);
       return date;
-    });
-  }, [month]);
-  const monthLabel = month.toLocaleDateString(undefined, { month: 'long', year: 'numeric' });
+    }), [start, view]);
+  const selectedTask = demoTasks.find((task) => task.title === selectedTaskTitle);
+  const movePeriod = (amount) => {
+    setSelectedTaskTitle('');
+    setActiveDate((date) => view === 'month'
+      ? new Date(date.getFullYear(), date.getMonth() + amount, 1)
+      : new Date(date.getFullYear(), date.getMonth(), date.getDate() + amount * 7));
+  };
+  const monthLabel = activeDate.toLocaleDateString(undefined, { month: 'long', year: 'numeric' });
+  const weekLabel = `${days[0]?.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })} – ${days[6]?.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}`;
+  const toggleTaskDetails = (title) => setSelectedTaskTitle((current) => current === title ? '' : title);
+  const statusTone = (status) => status === 'Done'
+    ? 'border-emerald-200 bg-emerald-50 text-emerald-800'
+    : status === 'In progress'
+      ? 'border-amber-200 bg-amber-50 text-amber-800'
+      : 'border-slate-200 bg-slate-50 text-slate-700';
 
   return (
     <div className="space-y-5">
       <section className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm">
-        <div className="flex items-center justify-between gap-3 border-b border-slate-100 px-4 py-4 sm:px-5">
-          <div><h2 className="font-semibold text-slate-900">{monthLabel}</h2><p className="mt-1 text-xs text-slate-500">Sample deadlines from across the workspace</p></div>
-          <div className="flex gap-2">
-            <button type="button" aria-label="Previous month" onClick={() => setMonth((date) => new Date(date.getFullYear(), date.getMonth() - 1, 1))} className="rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-600 hover:bg-slate-50"><LuChevronLeft aria-hidden="true" className="h-4 w-4" /></button>
-            <button type="button" aria-label="Next month" onClick={() => setMonth((date) => new Date(date.getFullYear(), date.getMonth() + 1, 1))} className="rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-600 hover:bg-slate-50"><LuChevronRight aria-hidden="true" className="h-4 w-4" /></button>
+        <div className="space-y-3 border-b border-slate-100 px-4 py-4 sm:px-5">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <h2 className="font-semibold text-slate-900">{view === 'month' ? monthLabel : weekLabel}</h2>
+              <p className="mt-1 text-xs text-slate-500">Sample deadlines from across the workspace</p>
+            </div>
+            <div className="inline-flex rounded-lg border border-slate-200 bg-slate-50 p-1" role="group" aria-label="Calendar view">
+              {['month', 'week'].map((option) => <button key={option} type="button" aria-pressed={view === option} onClick={() => { setView(option); setSelectedTaskTitle(''); }} className={`min-h-9 rounded-md px-3 text-xs font-semibold capitalize transition ${view === option ? 'bg-white text-orange-800 shadow-sm' : 'text-slate-500 hover:text-slate-800'}`}>{option}</button>)}
+            </div>
+          </div>
+          <div className="flex items-center justify-end gap-2">
+            <button type="button" aria-label="Previous period" onClick={() => movePeriod(-1)} className="inline-flex h-11 w-11 items-center justify-center rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50"><LuChevronLeft aria-hidden="true" className="h-4 w-4" /></button>
+            <button type="button" aria-label="Next period" onClick={() => movePeriod(1)} className="inline-flex h-11 w-11 items-center justify-center rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50"><LuChevronRight aria-hidden="true" className="h-4 w-4" /></button>
           </div>
         </div>
-        <div className="grid grid-cols-7 border-b border-slate-100 bg-slate-50/70">{['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) => <div key={day} className="py-2.5 text-center text-[10px] font-semibold uppercase tracking-wider text-slate-400 sm:text-xs">{day}</div>)}</div>
-        <div className="grid grid-cols-7">
-          {days.map((day) => {
-            const tasks = demoTasks.filter((task) => task.due.toDateString() === day.toDateString());
-            const isCurrentMonth = day.getMonth() === month.getMonth();
-            const isToday = day.toDateString() === new Date().toDateString();
-            return (
-              <div key={day.toISOString()} className={`min-h-[76px] border-b border-r border-slate-100 p-1.5 sm:min-h-24 sm:p-2 ${isCurrentMonth ? 'bg-white' : 'bg-slate-50/60'}`}>
-                <span className={`flex h-6 w-6 items-center justify-center rounded-full text-[11px] ${isToday ? 'bg-orange-700 font-bold text-white' : isCurrentMonth ? 'text-slate-600' : 'text-slate-300'}`}>{day.getDate()}</span>
-                {tasks.slice(0, 1).map((task) => <p key={task.title} title={task.title} className={`mt-1 truncate rounded bg-orange-50 px-1 py-1 text-[9px] font-medium text-orange-800 sm:text-[10px]`}>{task.title}</p>)}
-                {tasks.length > 1 && <p className="mt-1 text-[9px] text-slate-400">+{tasks.length - 1} more</p>}
-              </div>
-            );
-          })}
-        </div>
+        {view === 'month' ? (
+          <>
+            <div className="grid grid-cols-7 border-b border-slate-100 bg-slate-50/70">{['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) => <div key={day} className="py-2.5 text-center text-[10px] font-semibold uppercase tracking-wider text-slate-400 sm:text-xs">{day}</div>)}</div>
+            <div className="grid grid-cols-7">
+              {days.map((day) => {
+                const tasks = demoTasks.filter((task) => task.due.toDateString() === day.toDateString());
+                const isCurrentMonth = day.getMonth() === activeDate.getMonth();
+                const isToday = day.toDateString() === new Date().toDateString();
+                return (
+                  <div key={day.toISOString()} className={`min-h-[76px] border-b border-r border-slate-100 p-1.5 sm:min-h-24 sm:p-2 ${isCurrentMonth ? 'bg-white' : 'bg-slate-50/60'}`}>
+                    <span className={`flex h-6 w-6 items-center justify-center rounded-full text-[11px] ${isToday ? 'bg-orange-700 font-bold text-white' : isCurrentMonth ? 'text-slate-600' : 'text-slate-300'}`}>{day.getDate()}</span>
+                    {tasks.slice(0, 2).map((task) => <button key={task.title} type="button" aria-haspopup="dialog" aria-expanded={selectedTaskTitle === task.title} onClick={() => toggleTaskDetails(task.title)} title={task.title} className="mt-1 block min-h-9 w-full truncate rounded border border-slate-200 bg-orange-50 px-1 py-1 text-left text-[9px] font-medium text-orange-800 sm:text-[10px]">{task.title}</button>)}
+                    {tasks.length > 2 && <p className="mt-1 text-[9px] text-slate-400">+{tasks.length - 2} more</p>}
+                  </div>
+                );
+              })}
+            </div>
+          </>
+        ) : (
+          <div className="divide-y divide-slate-100">
+            {days.map((day) => {
+              const tasks = demoTasks.filter((task) => task.due.toDateString() === day.toDateString());
+              const isToday = day.toDateString() === new Date().toDateString();
+              return (
+                <section key={day.toISOString()} className={`grid gap-3 p-4 sm:grid-cols-[140px_minmax(0,1fr)] sm:gap-5 sm:px-5 ${isToday ? 'bg-orange-50/40' : 'bg-white'}`}>
+                  <div className="flex items-center gap-2 sm:block">
+                    <span className={`text-sm font-semibold ${isToday ? 'text-orange-800' : 'text-slate-800'}`}>{day.toLocaleDateString(undefined, { weekday: 'long' })}</span>
+                    <span className="text-xs text-slate-500">{dateLabel(day, { month: 'short', day: 'numeric' })}</span>
+                    {isToday && <span className="rounded-full bg-orange-100 px-2 py-0.5 text-[10px] font-semibold text-orange-800 sm:mt-2 sm:block sm:w-fit">Today</span>}
+                  </div>
+                  {tasks.length ? <div className="space-y-2">{tasks.map((task) => <button key={task.title} type="button" aria-haspopup="dialog" aria-expanded={selectedTaskTitle === task.title} onClick={() => toggleTaskDetails(task.title)} className={`flex min-h-11 w-full items-center justify-between gap-3 rounded-xl border px-3 py-2 text-left text-sm ${statusTone(task.status)}`}><span className="min-w-0 truncate font-medium">{task.title}</span><span className="shrink-0 text-xs">{task.status}</span></button>)}</div> : <p className="py-1 text-sm text-slate-400">No tasks due</p>}
+                </section>
+              );
+            })}
+          </div>
+        )}
       </section>
+      {selectedTask && (
+        <div role="dialog" aria-label={`${selectedTask.title} task details`} className="fixed inset-x-4 bottom-4 z-50 mx-auto max-w-sm rounded-2xl border border-slate-200 bg-white p-5 shadow-xl shadow-slate-900/15">
+          <div className="flex items-start gap-3">
+            <div className="min-w-0 flex-1"><h2 className="font-semibold text-slate-900">{selectedTask.title}</h2><p className="mt-1 text-xs text-slate-500">{selectedTask.project}</p></div>
+            <button type="button" onClick={() => setSelectedTaskTitle('')} aria-label="Close task details" className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-lg text-slate-500 transition hover:bg-slate-100 hover:text-slate-800"><LuX aria-hidden="true" className="h-4 w-4" /></button>
+          </div>
+          <div className="mt-3 flex flex-wrap items-center justify-between gap-3 border-t border-slate-100 pt-3">
+            <span className={`rounded-full border px-2.5 py-1 text-xs font-medium ${statusTone(selectedTask.status)}`}>{selectedTask.status}</span>
+            <span className="text-xs text-slate-500">Due {dateLabel(selectedTask.due, { month: 'long', day: 'numeric', year: 'numeric' })}</span>
+          </div>
+        </div>
+      )}
       <JoinCard title="Keep every deadline in view." description="Sign up to plan your personal and shared project work in one calendar." />
     </div>
   );
@@ -378,14 +478,17 @@ const pageContent = {
 
 const DemoWorkspace = () => {
   const { pathname } = useLocation();
+  const [signupPrompt, setSignupPrompt] = useState('');
   const activePath = navigation.find((item) => item.path === pathname)?.path || '/';
-  const page = pageContent[activePath];
+  const page = activePath === '/tasks'
+    ? { ...pageContent[activePath], view: <TasksView onRestrictedAction={setSignupPrompt} /> }
+    : pageContent[activePath];
 
   return (
     <div className="py-6 sm:py-8">
-      <div className="mb-5 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-orange-200/80 bg-orange-50/80 px-4 py-3">
-        <p className="text-sm text-orange-950"><span className="font-semibold">You’re exploring a demo.</span> This sample data is here to help you look around.</p>
-        <Link to="/register" className="inline-flex shrink-0 items-center gap-1 text-sm font-semibold text-orange-800 hover:text-orange-950">Make it yours <LuArrowRight aria-hidden="true" className="h-4 w-4" /></Link>
+      <div className="mb-5 flex flex-col items-stretch gap-3 rounded-xl border border-orange-200/80 bg-orange-50/80 p-4 md:flex-row md:items-center md:justify-between md:px-4 md:py-3">
+        <p className="min-w-0 text-sm leading-6 text-orange-950"><span className="font-semibold">You're exploring a demo with sample data.</span> Sign up to create and edit real tasks.</p>
+        <Link to="/register" className="inline-flex min-h-11 shrink-0 items-center justify-center gap-1 rounded-lg px-3 text-sm font-semibold text-orange-800 transition hover:bg-orange-100 hover:text-orange-950 md:min-h-0">Make it yours <LuArrowRight aria-hidden="true" className="h-4 w-4" /></Link>
       </div>
 
       <div className="grid items-start gap-6 lg:grid-cols-[205px_minmax(0,1fr)]">
@@ -394,7 +497,7 @@ const DemoWorkspace = () => {
           {navigation.map((item) => {
             const active = activePath === item.path;
             return (
-              <Link key={item.path} to={item.path} aria-current={active ? 'page' : undefined} className={`inline-flex shrink-0 items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm font-medium transition ${active ? 'bg-orange-50 text-orange-900' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'}`}>
+              <Link key={item.path} to={item.path} aria-current={active ? 'page' : undefined} className={`inline-flex min-h-11 shrink-0 items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm font-medium transition ${active ? 'bg-orange-50 text-orange-900' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'}`}>
                 <item.icon aria-hidden="true" className={`h-[18px] w-[18px] ${active ? 'text-orange-700' : 'text-slate-400'}`} />{item.label}
               </Link>
             );
@@ -407,7 +510,7 @@ const DemoWorkspace = () => {
         </nav>
 
         <main className="min-w-0 space-y-6">
-          <header className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+          <header className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
             <div>
               <p className="mb-2 text-[11px] font-bold uppercase tracking-[0.16em] text-orange-700">{page.eyebrow}</p>
               <h1 className="text-2xl font-bold tracking-tight text-slate-950 sm:text-3xl">{page.title}</h1>
@@ -418,6 +521,7 @@ const DemoWorkspace = () => {
           {page.view}
         </main>
       </div>
+      {signupPrompt && <DemoSignupPrompt message={signupPrompt} onClose={() => setSignupPrompt('')} />}
     </div>
   );
 };

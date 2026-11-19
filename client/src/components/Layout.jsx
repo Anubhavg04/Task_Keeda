@@ -11,10 +11,12 @@ import {
   LuLayoutDashboard,
   LuListTodo,
   LuLogOut,
+  LuMenu,
   LuNotebookPen,
   LuPlus,
   LuSearch,
   LuScale,
+  LuX,
 } from 'react-icons/lu';
 import { useAuth } from '../context/useAuth.js';
 import { projectAPI } from '../services/api.js';
@@ -51,6 +53,7 @@ const Layout = ({ children }) => {
   const [search, setSearch] = useState('');
   const [logoutError, setLogoutError] = useState('');
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [projects, setProjects] = useState([]);
   const [projectsError, setProjectsError] = useState('');
   const [workspaceMenuOpen, setWorkspaceMenuOpen] = useState(false);
@@ -108,6 +111,20 @@ const Layout = ({ children }) => {
     window.addEventListener('keydown', handleShortcut);
     return () => window.removeEventListener('keydown', handleShortcut);
   }, [isAuthenticated]);
+
+  useEffect(() => {
+    if (!mobileNavOpen) return undefined;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    const closeOnEscape = (event) => {
+      if (event.key === 'Escape') setMobileNavOpen(false);
+    };
+    window.addEventListener('keydown', closeOnEscape);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener('keydown', closeOnEscape);
+    };
+  }, [mobileNavOpen]);
 
   const handleLogout = async () => {
     setLogoutError('');
@@ -261,12 +278,22 @@ const Layout = ({ children }) => {
       <div className="lg:pl-[252px]">
         <header className="sticky top-0 z-10 border-b border-slate-200/80 bg-white/90 backdrop-blur-xl">
           <div className="flex h-[68px] items-center justify-between gap-4 px-4 sm:px-7 lg:px-9">
-            <div className="flex min-w-0 items-center gap-3 lg:hidden">
+            <div className="flex min-w-0 items-center gap-2 lg:hidden">
+              <button
+                type="button"
+                onClick={() => setMobileNavOpen(true)}
+                aria-label="Open navigation menu"
+                aria-expanded={mobileNavOpen}
+                aria-controls="mobile-navigation-drawer"
+                className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-lg text-slate-600 transition hover:bg-orange-50 hover:text-orange-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-orange-700 md:hidden"
+              >
+                <LuMenu aria-hidden="true" className="h-5 w-5" />
+              </button>
               <Link to="/" aria-label="TaskFlow home" className="rounded-lg">
                 <TaskFlowLogo markClassName="h-8 w-8" textClassName="text-lg" />
               </Link>
             </div>
-            <form onSubmit={handleSearch} role="search" className="hidden max-w-xl flex-1 sm:block">
+            <form onSubmit={handleSearch} role="search" className="hidden max-w-xl flex-1 md:block">
               <label className="sr-only" htmlFor="global-search">Search tasks</label>
               <div className="relative">
                 <LuSearch aria-hidden="true" className="absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-slate-400" />
@@ -281,14 +308,14 @@ const Layout = ({ children }) => {
                 <kbd className="absolute right-3 top-1/2 hidden -translate-y-1/2 rounded border border-slate-200 bg-white px-1.5 py-0.5 text-[10px] text-slate-400 md:block">Enter</kbd>
               </div>
             </form>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 sm:gap-3">
               <NotificationBell />
               <button
                 type="button"
                 onClick={() => setCommandPaletteOpen(true)}
                 title="Quick actions (Ctrl+K)"
                 aria-label="Open quick actions"
-                className="inline-flex h-9 items-center gap-2 rounded-lg border border-slate-200 bg-white px-2.5 text-slate-500 transition hover:border-orange-200 hover:bg-orange-50 hover:text-orange-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-orange-700"
+                className="hidden h-11 items-center gap-2 rounded-lg border border-slate-200 bg-white px-2.5 text-slate-500 transition hover:border-orange-200 hover:bg-orange-50 hover:text-orange-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-orange-700 md:inline-flex"
               >
                 <LuCommand aria-hidden="true" className="h-4 w-4" />
                 <span className="hidden text-xs font-medium sm:inline">Quick actions</span>
@@ -299,16 +326,13 @@ const Layout = ({ children }) => {
               <div className="flex h-9 w-9 items-center justify-center rounded-full bg-orange-100 text-sm font-semibold text-orange-800">
                 {(user?.fullname || 'Y').slice(0, 1).toUpperCase()}
               </div>
-              <button type="button" onClick={handleLogout} aria-label="Sign out" className="rounded-lg p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-700 lg:hidden">
-                <LuLogOut aria-hidden="true" className="h-4 w-4" />
-              </button>
             </div>
           </div>
-          <nav aria-label="Mobile navigation" className="flex gap-1 overflow-x-auto border-t border-slate-100 px-3 py-2 lg:hidden">
+          <nav aria-label="Mobile navigation" className="hidden gap-1 overflow-x-auto border-t border-slate-100 px-3 py-2 md:flex lg:hidden">
             {navigation.map((item) => {
               const active = location.pathname === item.path;
               return (
-                <Link key={item.path} to={item.path} aria-current={active ? 'page' : undefined} className={`flex shrink-0 items-center gap-2 rounded-lg px-3 py-2 text-xs font-medium ${active ? 'bg-orange-50 text-orange-800' : 'text-slate-500 hover:bg-slate-50'}`}>
+                <Link key={item.path} to={item.path} aria-current={active ? 'page' : undefined} className={`flex min-h-11 shrink-0 items-center gap-2 rounded-lg px-3 py-2 text-xs font-medium ${active ? 'bg-orange-50 text-orange-800' : 'text-slate-500 hover:bg-slate-50'}`}>
                   <item.icon aria-hidden="true" className="h-4 w-4" />
                   {item.label}
                 </Link>
@@ -320,6 +344,70 @@ const Layout = ({ children }) => {
           {children}
         </main>
       </div>
+      {mobileNavOpen && (
+        <div className="fixed inset-0 z-40 md:hidden">
+          <button type="button" aria-label="Close navigation menu" onClick={() => setMobileNavOpen(false)} className="absolute inset-0 bg-slate-950/40" />
+          <aside id="mobile-navigation-drawer" role="dialog" aria-modal="true" aria-label="Main navigation" className="relative flex h-full w-[min(21rem,88vw)] flex-col border-r border-slate-200 bg-white shadow-2xl">
+            <div className="flex h-[68px] items-center justify-between border-b border-slate-100 px-5">
+              <Link to="/" aria-label="TaskFlow home" onClick={() => setMobileNavOpen(false)}><TaskFlowLogo /></Link>
+              <button type="button" onClick={() => setMobileNavOpen(false)} aria-label="Close navigation menu" className="inline-flex h-11 w-11 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100 hover:text-slate-800">
+                <LuX aria-hidden="true" className="h-5 w-5" />
+              </button>
+            </div>
+            <div className="min-h-0 flex-1 overflow-y-auto px-4 py-5">
+              <p className="mb-3 px-3 text-[11px] font-semibold uppercase tracking-[0.13em] text-slate-400">Workspace</p>
+              <div className="mb-5 rounded-xl bg-slate-50 p-3">
+                <p className="truncate text-sm font-semibold text-slate-800">{workspaceLabel}</p>
+                <p className="mt-1 text-xs text-slate-500">{activeProject ? 'Shared team workspace' : `${projects.length} team workspace${projects.length === 1 ? '' : 's'}`}</p>
+              </div>
+              <nav aria-label="Main navigation" className="space-y-1">
+                {navigation.map((item) => {
+                  const active = location.pathname === item.path || (item.path !== '/' && location.pathname.startsWith(`${item.path}/`));
+                  return (
+                    <Link
+                      key={item.path}
+                      to={item.path}
+                      onClick={() => setMobileNavOpen(false)}
+                      aria-current={active ? 'page' : undefined}
+                      className={`flex min-h-11 items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition ${active ? 'bg-orange-50 text-orange-800' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'}`}
+                    >
+                      <item.icon aria-hidden="true" className={`h-[18px] w-[18px] ${active ? 'text-orange-700' : 'text-slate-400'}`} />
+                      {item.label}
+                    </Link>
+                  );
+                })}
+              </nav>
+              <div className="mb-3 mt-8 flex items-center justify-between px-3">
+                <span className="text-[11px] font-semibold uppercase tracking-[0.13em] text-slate-400">Team workspaces</span>
+                <Link to="/projects" onClick={() => setMobileNavOpen(false)} aria-label="View team workspaces" className="inline-flex h-11 w-11 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100 hover:text-slate-800"><LuPlus aria-hidden="true" className="h-4 w-4" /></Link>
+              </div>
+              <Link to="/projects" onClick={() => setMobileNavOpen(false)} className="flex min-h-11 items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-slate-600 transition hover:bg-slate-50 hover:text-orange-800">
+                <span className="flex h-5 w-5 items-center justify-center rounded-md border border-dashed border-slate-300"><LuPlus aria-hidden="true" className="h-3.5 w-3.5" /></span>
+                <span>Create team workspace</span>
+              </Link>
+              {projects.slice(0, 4).map((project) => (
+                <Link key={project._id} to={`/tasks?projectId=${project._id}`} onClick={() => setMobileNavOpen(false)} className="flex min-h-11 items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-slate-600 transition hover:bg-slate-50 hover:text-orange-800">
+                  <span className={`h-2 w-2 shrink-0 rounded-full ${projectDots[project.color] || projectDots.orange}`} />
+                  <span className="truncate">{project.name}</span>
+                </Link>
+              ))}
+              {projectsError && <p role="alert" className="mt-2 px-3 text-xs text-rose-600">{projectsError}</p>}
+            </div>
+            <div className="border-t border-slate-100 p-4">
+              <div className="flex items-center gap-3 rounded-xl bg-slate-50 p-3">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-orange-100 text-sm font-semibold text-orange-800">
+                  {(user?.fullname || 'Y').slice(0, 1).toUpperCase()}
+                </div>
+                <span className="min-w-0 flex-1 truncate text-sm font-semibold text-slate-800">{user?.fullname || 'Your account'}</span>
+                <button type="button" onClick={handleLogout} aria-label="Sign out" className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 transition hover:bg-orange-50 hover:text-orange-800">
+                  <LuLogOut aria-hidden="true" className="h-4 w-4" />
+                </button>
+              </div>
+              {logoutError && <p role="alert" className="mt-2 px-2 text-xs text-red-600">{logoutError}</p>}
+            </div>
+          </aside>
+        </div>
+      )}
       {commandPaletteOpen && <CommandPalette onClose={() => setCommandPaletteOpen(false)} />}
     </div>
   );

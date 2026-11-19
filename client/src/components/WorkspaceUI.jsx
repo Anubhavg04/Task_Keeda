@@ -46,19 +46,92 @@ export const LoadingState = ({ label = 'Loading...' }) => (
   </div>
 );
 
-export const ErrorState = ({ message, onRetry }) => (
-  <div role="alert" className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-    <div className="flex flex-wrap items-center justify-between gap-3">
-      <span>{message}</span>
-      {onRetry && <button type="button" onClick={onRetry} className="font-semibold underline underline-offset-2">Try again</button>}
-    </div>
+const SkeletonBlock = ({ className = '' }) => (
+  <div aria-hidden="true" className={`animate-pulse rounded-lg bg-slate-200/70 ${className}`} />
+);
+
+export const TasksListSkeleton = () => (
+  <div role="status" aria-label="Loading tasks" className="space-y-3">
+    {Array.from({ length: 4 }, (_, index) => (
+      <div key={index} className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm">
+        <div className="flex gap-4">
+          <SkeletonBlock className="h-6 w-6 shrink-0 rounded-full" />
+          <div className="min-w-0 flex-1 space-y-3">
+            <div className="flex flex-wrap gap-2"><SkeletonBlock className="h-5 w-48 max-w-full" /><SkeletonBlock className="h-5 w-20" /><SkeletonBlock className="h-5 w-16" /></div>
+            <SkeletonBlock className="h-4 w-3/4 max-w-full" />
+            <SkeletonBlock className="h-3 w-2/5 max-w-full" />
+          </div>
+        </div>
+      </div>
+    ))}
+    <span className="sr-only">Loading your tasks...</span>
   </div>
 );
 
-export const EmptyState = ({ title, description, action }) => (
+export const ProjectsCardsSkeleton = () => (
+  <div role="status" aria-label="Loading projects" className="grid gap-5 md:grid-cols-2 2xl:grid-cols-3">
+    {Array.from({ length: 3 }, (_, index) => (
+      <div key={index} className="rounded-2xl border border-slate-200/80 border-t-[3px] border-t-orange-300 bg-white p-5 shadow-sm sm:p-6">
+        <div className="flex items-start gap-3"><SkeletonBlock className="mt-1 h-3 w-3 rounded-full" /><div className="flex-1 space-y-2"><SkeletonBlock className="h-5 w-3/4" /><SkeletonBlock className="h-5 w-16 rounded-full" /></div></div>
+        <SkeletonBlock className="mt-5 h-4 w-full" />
+        <SkeletonBlock className="mt-2 h-4 w-4/5" />
+        <SkeletonBlock className="mt-6 h-20 w-full" />
+        <SkeletonBlock className="mt-5 h-9 w-full" />
+      </div>
+    ))}
+    <span className="sr-only">Loading your projects...</span>
+  </div>
+);
+
+export const NotesGridSkeleton = () => (
+  <div role="status" aria-label="Loading notes" className="grid gap-4 md:grid-cols-2 2xl:grid-cols-3">
+    {Array.from({ length: 3 }, (_, index) => (
+      <div key={index} className="flex min-h-56 flex-col rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm">
+        <SkeletonBlock className="h-4 w-28" />
+        <SkeletonBlock className="mt-5 h-5 w-3/4" />
+        <div className="mt-4 flex-1 space-y-2"><SkeletonBlock className="h-4 w-full" /><SkeletonBlock className="h-4 w-full" /><SkeletonBlock className="h-4 w-2/3" /></div>
+        <SkeletonBlock className="mt-5 h-4 w-24" />
+      </div>
+    ))}
+    <span className="sr-only">Loading your notes...</span>
+  </div>
+);
+
+export const ReportsSkeleton = () => (
+  <div role="status" aria-label="Loading reports" className="space-y-5">
+    <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      {Array.from({ length: 4 }, (_, index) => (
+        <div key={index} className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm">
+          <SkeletonBlock className="h-4 w-24" /><SkeletonBlock className="mt-4 h-9 w-20" /><SkeletonBlock className="mt-4 h-3 w-32" />
+        </div>
+      ))}
+    </div>
+    <div className="grid gap-5 xl:grid-cols-2">
+      {Array.from({ length: 2 }, (_, index) => (
+        <div key={index} className="rounded-2xl border border-slate-200/80 bg-white p-6 shadow-sm">
+          <SkeletonBlock className="h-5 w-32" /><SkeletonBlock className="mt-2 h-4 w-48" />
+          <div className="mt-7 space-y-5">{Array.from({ length: 4 }, (_, row) => <SkeletonBlock key={row} className="h-4 w-full" />)}</div>
+        </div>
+      ))}
+    </div>
+    <span className="sr-only">Calculating workspace insights...</span>
+  </div>
+);
+
+export const ErrorState = ({ message, onRetry }) => (
+  <div role="alert" className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-rose-200 bg-rose-50/80 px-4 py-4 text-sm text-rose-900">
+    <div>
+      <p className="font-semibold">{message}</p>
+      <p className="mt-1 text-xs leading-5 text-rose-800">The server may be waking up or temporarily unavailable. Please try again in a moment.</p>
+    </div>
+    {onRetry && <button type="button" onClick={onRetry} className="inline-flex items-center justify-center rounded-lg border border-rose-200 bg-white px-3 py-2 text-xs font-semibold text-rose-800 transition hover:bg-rose-100">Retry</button>}
+  </div>
+);
+
+export const EmptyState = ({ title, description, action, icon = LuFolderOpen }) => (
   <div className="rounded-2xl border border-dashed border-slate-300 bg-white px-6 py-12 text-center">
     <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-orange-50 text-orange-800">
-      <LuFolderOpen aria-hidden="true" className="h-6 w-6" />
+      {React.createElement(icon, { 'aria-hidden': true, className: 'h-6 w-6' })}
     </div>
     <h2 className="mt-4 text-base font-semibold text-slate-900">{title}</h2>
     <p className="mx-auto mt-2 max-w-sm text-sm leading-6 text-slate-500">{description}</p>

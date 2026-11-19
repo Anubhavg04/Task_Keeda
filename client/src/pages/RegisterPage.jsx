@@ -58,8 +58,8 @@ const RegisterPage = () => {
       title="Make space for your best work."
       description="Create your account and bring tasks, projects, and your team into one clear workspace."
     >
-      <form onSubmit={handleSubmit} className="rounded-[1.4rem] border border-stone-200/80 bg-white p-6 shadow-[0_24px_70px_-35px_rgba(54,44,31,0.28)] ring-1 ring-black/[0.02] sm:p-8">
-        <div className="space-y-4">
+      <form onSubmit={handleSubmit} className="rounded-[1.4rem] border border-stone-200/80 bg-white p-5 shadow-[0_24px_70px_-35px_rgba(54,44,31,0.28)] ring-1 ring-black/[0.02] md:p-8">
+        <div className="space-y-5">
           <div>
             <label htmlFor="fullname" className="mb-2 block text-sm font-semibold text-slate-700">Full name</label>
             <div className="relative">
@@ -110,14 +110,14 @@ const RegisterPage = () => {
                 onChange={handleChange}
                 required
                 minLength={8}
-                className={`${fieldClass} pr-12`}
+                className={`${fieldClass} pr-14 md:pr-12`}
                 placeholder="At least 8 characters"
               />
               <button
                 type="button"
                 onClick={() => setShowPassword((visible) => !visible)}
                 aria-label={showPassword ? 'Hide password' : 'Show password'}
-                className="absolute right-2.5 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-lg text-slate-400 transition hover:bg-stone-100 hover:text-slate-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-orange-600"
+                className="absolute right-1.5 top-1/2 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-lg text-slate-400 transition hover:bg-stone-100 hover:text-slate-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-orange-600 md:right-2.5 md:h-9 md:w-9"
               >
                 {showPassword
                   ? <LuEyeOff aria-hidden="true" className="h-[18px] w-[18px]" />
@@ -139,14 +139,14 @@ const RegisterPage = () => {
                 onChange={handleChange}
                 required
                 minLength={8}
-                className={`${fieldClass} pr-12`}
+                className={`${fieldClass} pr-14 md:pr-12`}
                 placeholder="Enter your password again"
               />
               <button
                 type="button"
                 onClick={() => setShowConfirmPassword((visible) => !visible)}
                 aria-label={showConfirmPassword ? 'Hide confirmation password' : 'Show confirmation password'}
-                className="absolute right-2.5 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-lg text-slate-400 transition hover:bg-stone-100 hover:text-slate-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-orange-600"
+                className="absolute right-1.5 top-1/2 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-lg text-slate-400 transition hover:bg-stone-100 hover:text-slate-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-orange-600 md:right-2.5 md:h-9 md:w-9"
               >
                 {showConfirmPassword
                   ? <LuEyeOff aria-hidden="true" className="h-[18px] w-[18px]" />
