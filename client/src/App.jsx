@@ -1,6 +1,7 @@
 import React, { lazy, Suspense, useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
+import { Analytics } from '@vercel/analytics/react';
 import { LuCircleAlert, LuCircleCheck } from 'react-icons/lu';
 import { AuthProvider } from './context/AuthContext.jsx';
 import Layout from './components/Layout.jsx';
@@ -70,6 +71,7 @@ function App() {
   return (
     <AuthProvider>
       <Router>
+        <Analytics />
         <Layout>
           <Suspense fallback={<RouteLoadingState />}>
             <Routes>
