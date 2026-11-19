@@ -45,6 +45,7 @@ export const clearCachedUserSession = () => {
 };
 
 let requestSequence = 0;
+let projectsRequest = null;
 const clearSlowRequestTimer = (config) => {
   if (!config?._slowRequestTimer) return;
   window.clearTimeout(config._slowRequestTimer);
@@ -98,7 +99,14 @@ export const taskAPI = {
 };
 
 export const projectAPI = {
-  getProjects: () => api.get('/projects'),
+  getProjects: () => {
+    if (!projectsRequest) {
+      projectsRequest = api.get('/projects').finally(() => {
+        projectsRequest = null;
+      });
+    }
+    return projectsRequest;
+  },
   createProject: (data) => api.post('/projects', data),
   addMember: (projectId, email) => api.post(`/projects/${projectId}/members`, { email }),
   removeMember: (projectId, memberId) => api.delete(`/projects/${projectId}/members/${memberId}`),

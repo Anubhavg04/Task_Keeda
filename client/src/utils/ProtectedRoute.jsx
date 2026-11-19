@@ -6,6 +6,7 @@ const ProtectedRoute = ({ children, demo }) => {
   const { isAuthenticated, loading } = useAuth();
 
   if (loading) {
+    if (demo) return demo;
     return (
       <div className="flex min-h-screen items-center justify-center bg-[#faf8f4]">
         <div className="flex items-center gap-3 text-sm font-medium text-slate-500" role="status">

@@ -64,7 +64,7 @@ const ApiLatencyNotice = () => {
   return (
     <div className="fixed bottom-4 left-1/2 z-[100] flex w-max max-w-[calc(100vw-2rem)] -translate-x-1/2 items-center gap-3 rounded-xl border border-orange-200 bg-white/95 px-4 py-3 text-sm text-slate-700 shadow-lg shadow-slate-900/10 backdrop-blur" role="status" aria-live="polite">
       <span className="h-4 w-4 shrink-0 animate-spin rounded-full border-2 border-orange-200 border-t-orange-700" />
-      <span>Waking up the server... this can take a few seconds on free plans</span>
+      <span>The server is taking longer than usual. Free hosting can take about a minute to wake after inactivity—please keep this tab open.</span>
     </div>
   );
 };

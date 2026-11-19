@@ -43,6 +43,7 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (email, password) => {
     try {
+      if (sessionCheckPromise) await sessionCheckPromise;
       dispatch({ type: 'LOGIN_START' });
       const response = await authAPI.login({ email, password });
       cacheUserSession(response.data.user);

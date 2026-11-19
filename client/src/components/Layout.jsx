@@ -183,7 +183,7 @@ const Layout = ({ children }) => {
     navigate(query ? `/tasks?search=${encodeURIComponent(query)}` : '/tasks');
   };
 
-  if (loading) {
+  if (loading && !isAuthPage && location.pathname !== '/') {
     return (
       <div className="flex min-h-screen items-center justify-center bg-[#faf8f4]">
         <div className="flex items-center gap-3 text-sm font-medium text-slate-500" role="status">
