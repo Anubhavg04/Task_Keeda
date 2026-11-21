@@ -136,6 +136,61 @@ const taskBoardColumns = [
 const showcaseLinkClass = 'inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-orange-200/80 bg-white px-5 py-3 text-sm font-semibold text-orange-800 shadow-sm shadow-orange-950/[0.03] transition duration-200 hover:-translate-y-0.5 hover:border-orange-300 hover:bg-orange-50/70 hover:shadow-md active:translate-y-0 active:scale-[0.99] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange-700';
 const primaryMarketingButtonClass = 'inline-flex min-h-12 whitespace-nowrap items-center justify-center gap-2 rounded-xl bg-orange-700 px-5 py-3 text-sm font-semibold text-white shadow-md shadow-orange-900/15 transition duration-200 hover:-translate-y-0.5 hover:bg-orange-800 hover:shadow-lg hover:shadow-orange-900/20 active:translate-y-0 active:scale-[0.99] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange-700';
 
+const ProductDemoVideo = () => {
+  const videoRef = React.useRef(null);
+  const [shouldLoadVideo, setShouldLoadVideo] = React.useState(false);
+
+  React.useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return undefined;
+    if (!('IntersectionObserver' in window)) {
+      setShouldLoadVideo(true);
+      return undefined;
+    }
+
+    const observer = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting) {
+        setShouldLoadVideo(true);
+        observer.disconnect();
+      }
+    }, { rootMargin: '300px 0px' });
+    observer.observe(video);
+
+    return () => observer.disconnect();
+  }, []);
+
+  return (
+    <section aria-labelledby="product-demo-title" className="mt-16 sm:mt-20">
+      <div className="mx-auto max-w-2xl text-center">
+        <p className="text-xs font-semibold uppercase tracking-[0.14em] text-orange-700">A closer look</p>
+        <h2 id="product-demo-title" className="mt-3 text-2xl font-bold leading-tight tracking-tight text-slate-950 sm:text-3xl">See it in action.</h2>
+        <p className="mt-3 text-sm leading-6 text-slate-600 sm:text-base">Take a quick tour of how TaskFlow brings your work together.</p>
+      </div>
+      <div className="mx-auto mt-8 w-full max-w-[1000px] overflow-hidden rounded-3xl border border-slate-200/80 bg-white shadow-[0_28px_64px_-32px_rgba(65,48,29,0.3)] ring-1 ring-slate-900/[0.04]">
+        <video
+          ref={videoRef}
+          src={shouldLoadVideo ? '/taskflow-demo.mp4' : undefined}
+          controls
+          muted
+          playsInline
+          preload="metadata"
+          poster="/taskflow-demo-poster.jpg"
+          aria-label="TaskFlow product demo video"
+          className="block aspect-video w-full bg-slate-950 object-contain"
+        >
+          Your browser does not support HTML video.{' '}
+          <a href="/taskflow-demo.mp4">Download the TaskFlow product demo.</a>
+        </video>
+      </div>
+      <div className="mt-6 text-center">
+        <Link to="/register" className={primaryMarketingButtonClass}>
+          Create free account <LuArrowRight aria-hidden="true" className="h-4 w-4" />
+        </Link>
+      </div>
+    </section>
+  );
+};
+
 const ProductPreview = () => (
   <div className="relative mx-auto w-full max-w-[720px] pb-5 lg:ml-auto">
     <div aria-hidden="true" className="absolute -inset-5 rounded-[2rem] bg-gradient-to-br from-orange-200/50 via-orange-100/20 to-emerald-100/50 blur-2xl" />
@@ -338,6 +393,8 @@ const LandingPage = () => {
       </section>
       <ProductPreview />
     </div>
+
+    <ProductDemoVideo />
 
     <section aria-labelledby="problem-title" className="mt-16 grid items-center gap-6 md:mt-24 md:grid-cols-2 md:gap-10">
       <div className="max-w-xl">
