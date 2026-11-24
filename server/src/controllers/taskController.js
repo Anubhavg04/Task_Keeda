@@ -895,7 +895,12 @@ export const bulkUpdateTasks = async (req, res) => {
     }
     if (status === 'done') {
       const selectedTasks = await Task.find(updateFilter).select('_id dependsOn').lean();
-      const dependencyIds = [...new Set(selectedTasks.flatMap((task) => (task.dependsOn || []).map(String)))];
+      const selectedIdSet = new Set(taskIds.map((id) => id.toLowerCase()));
+      const dependencyIds = [...new Set(
+        selectedTasks
+          .flatMap((task) => (task.dependsOn || []).map(String))
+          .filter((id) => !selectedIdSet.has(id.toLowerCase()))
+      )];
       const incompleteIds = new Set(dependencyIds.length
         ? (await Task.find({
           $and: [
@@ -910,15 +915,18 @@ export const bulkUpdateTasks = async (req, res) => {
       }
     }
 
-    const updates = {};
-    if (status !== undefined) {
-      updates.status = status;
-      updates.completedAt = status === 'done' ? new Date() : null;
+    if (status === 'done') {
+      // Only newly completed tasks get a fresh completion time; already-done tasks keep theirs.
+      await Task.updateMany(
+        { ...updateFilter, status: { $ne: 'done' } },
+        { $set: { status: 'done', completedAt: new Date() } }
+      );
+    } else if (status !== undefined) {
+      await Task.updateMany(updateFilter, { $set: { status, completedAt: null } });
     }
-    if (priority !== undefined) updates.priority = priority;
-    if (status !== undefined) updates.completedAt = status === 'done' ? new Date() : null;
-
-    await Task.updateMany(updateFilter, { $set: updates });
+    if (priority !== undefined) {
+      await Task.updateMany(updateFilter, { $set: { priority } });
+    }
     const tasks = await Task.find(updateFilter)
       .populate('project', 'name color')
       .populate('assignee', 'fullname email')

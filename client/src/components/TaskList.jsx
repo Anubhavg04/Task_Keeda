@@ -238,7 +238,7 @@ const TaskList = () => {
             <input name="search" value={search} onChange={handleSearchChange} placeholder="Search title or description..." className={`${inputClass} mt-1.5 font-normal`} />
           </label>
           <label className="text-xs font-semibold text-slate-600">Workspace
-            <select value={filters.projectId} onChange={(event) => {
+            <select value={projectId} onChange={(event) => {
               const next = new URLSearchParams(searchParams);
               if (event.target.value) next.set('projectId', event.target.value);
               else next.delete('projectId');

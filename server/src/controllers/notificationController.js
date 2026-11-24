@@ -121,10 +121,8 @@ export const savePushSubscription = async (req, res) => {
 
   try {
     const existing = await PushSubscription.findOne({ endpoint }).select('_id user').lean();
-    if (existing && String(existing.user) !== String(req.user.id)) {
-      return res.status(409).json({ message: 'This device subscription is already linked to another account' });
-    }
-    if (!existing && await PushSubscription.countDocuments({ user: req.user.id }) >= 10) {
+    const alreadyOwnedByUser = existing && String(existing.user) === String(req.user.id);
+    if (!alreadyOwnedByUser && await PushSubscription.countDocuments({ user: req.user.id }) >= 10) {
       return res.status(429).json({ message: 'A maximum of 10 notification-enabled devices is allowed per account' });
     }
 
