@@ -1,4 +1,5 @@
 import 'dotenv/config';
+import mongoose from 'mongoose';
 import express from 'express';
 import cors from 'cors';
 import cookieParser from 'cookie-parser'
@@ -32,7 +33,6 @@ app.use((req, res, next) => {
 });
 app.use(express.json({ limit: '1mb' }));
 app.use(cookieParser());
-app.use(express.urlencoded({extended:true}))
 app.use((req, res, next) => {
     if (req.body === undefined) {
         req.body = {};
@@ -68,6 +68,15 @@ app.use("/api/notifications", notificationRoutes);
 
 app.get("/", (req,res) =>{
     res.json({message: "TaskFlow API running"});
+});
+
+app.get('/api/health', (res,req) => {
+    const dbConnected = mongoose.connection.readyState === 1;
+    req.set('Cache-Control', 'no-store');
+    res,status(dbConnected ? 200 : 503).json({
+        status : dbConnected ? 'ok' : 'degraded',
+        uptimeSeconds : Math.round(process.uptime()),
+    });
 });
 
 app.use('/api', (req, res) => {
