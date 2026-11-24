@@ -70,10 +70,10 @@ app.get("/", (req,res) =>{
     res.json({message: "TaskFlow API running"});
 });
 
-app.get('/api/health', (res,req) => {
+app.get('/api/health', (req,res) => {
     const dbConnected = mongoose.connection.readyState === 1;
     req.set('Cache-Control', 'no-store');
-    res,status(dbConnected ? 200 : 503).json({
+    res.status(dbConnected ? 200 : 503).json({
         status : dbConnected ? 'ok' : 'degraded',
         uptimeSeconds : Math.round(process.uptime()),
     });
