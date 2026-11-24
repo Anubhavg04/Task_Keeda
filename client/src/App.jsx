@@ -1,4 +1,4 @@
-import React, { lazy, Suspense, useEffect, useState } from 'react';
+import React, { lazy, Suspense} from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import { Analytics } from '@vercel/analytics/react';
@@ -34,40 +34,6 @@ const RouteLoadingState = () => (
     </div>
   </div>
 );
-
-const ApiLatencyNotice = () => {
-  const [slowRequests, setSlowRequests] = useState(() => new Set());
-
-  useEffect(() => {
-    const handleSlowRequest = (event) => {
-      if (!event.detail?.id) return;
-      setSlowRequests((current) => new Set(current).add(event.detail.id));
-    };
-    const handleSettledRequest = (event) => {
-      if (!event.detail?.id) return;
-      setSlowRequests((current) => {
-        if (!current.has(event.detail.id)) return current;
-        const next = new Set(current);
-        next.delete(event.detail.id);
-        return next;
-      });
-    };
-    window.addEventListener('taskflow:api-request-slow', handleSlowRequest);
-    window.addEventListener('taskflow:api-request-settled', handleSettledRequest);
-    return () => {
-      window.removeEventListener('taskflow:api-request-slow', handleSlowRequest);
-      window.removeEventListener('taskflow:api-request-settled', handleSettledRequest);
-    };
-  }, []);
-
-  if (!slowRequests.size) return null;
-  return (
-    <div className="fixed bottom-4 left-1/2 z-[100] flex w-max max-w-[calc(100vw-2rem)] -translate-x-1/2 items-center gap-3 rounded-xl border border-orange-200 bg-white/95 px-4 py-3 text-sm text-slate-700 shadow-lg shadow-slate-900/10 backdrop-blur" role="status" aria-live="polite">
-      <span className="h-4 w-4 shrink-0 animate-spin rounded-full border-2 border-orange-200 border-t-orange-700" />
-      <span>The server is taking longer than usual. Free hosting can take about a minute to wake after inactivity—please keep this tab open.</span>
-    </div>
-  );
-};
 
 function App() {
   const protectedPage = (page) => <ProtectedRoute demo={<DemoWorkspace />}>{page}</ProtectedRoute>;
@@ -120,7 +86,6 @@ function App() {
             }}
           />
         </Layout>
-        <ApiLatencyNotice />
       </Router>
     </AuthProvider>
   );

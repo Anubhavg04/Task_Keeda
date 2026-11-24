@@ -7,6 +7,7 @@ const USER_SESSION_TTL = 5 * 60 * 1000;
 const api = axios.create({
   baseURL: API_BASE_URL,
   withCredentials: true,
+  timeout: 75000,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -44,33 +45,29 @@ export const clearCachedUserSession = () => {
   }
 };
 
-let requestSequence = 0;
 let projectsRequest = null;
-const clearSlowRequestTimer = (config) => {
-  if (!config?._slowRequestTimer) return;
-  window.clearTimeout(config._slowRequestTimer);
-  window.dispatchEvent(new CustomEvent('taskflow:api-request-settled', {
-    detail: { id: config._slowRequestId },
-  }));
-};
 
-api.interceptors.request.use((config) => {
-  config._slowRequestId = `${Date.now()}-${requestSequence += 1}`;
-  config._slowRequestTimer = window.setTimeout(() => {
-    window.dispatchEvent(new CustomEvent('taskflow:api-request-slow', {
-      detail: { id: config._slowRequestId },
-    }));
-  }, 1800);
-  return config;
-});
+const RETRYABLE_STATUS = [502, 503, 504];
+const MAX_RETRIES = 8;
+const RETRY_DELAY_MS = 4000;
+const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 api.interceptors.response.use(
-  (response) => {
-    clearSlowRequestTimer(response.config);
-    return response;
-  },
-  (error) => {
-    clearSlowRequestTimer(error.config);
+  (response) => response,
+  async (error) => {
+    const config = error.config;
+    const isTimeout = error.code === 'ECONNABORTED' || error.code === 'ETIMEDOUT';
+    const isNetworkError = !error.response && !isTimeout && error.code !== 'ERR_CANCELED';
+    const isRetryableStatus = RETRYABLE_STATUS.includes(error.response?.status);
+    const isSafeToRetry = config && (config.method === 'get' || config.url === '/auth/login');
+
+    // While the server wakes up, silently retry safe requests (no message shown to the user)
+    if (isSafeToRetry && (isNetworkError || isRetryableStatus) && (config._retryCount || 0) < MAX_RETRIES) {
+      config._retryCount = (config._retryCount || 0) + 1;
+      await wait(RETRY_DELAY_MS);
+      return api(config);
+    }
+
     if (error.response?.status === 401) {
       clearCachedUserSession();
       const url = error.config?.url || '';
