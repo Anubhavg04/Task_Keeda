@@ -1,28 +1,39 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { taskAPI } from '../services/api.js';
 
 export const useTasks = () => {
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  // Only failures of loading the list itself (not create/update/delete/bulk failures).
+  const [fetchError, setFetchError] = useState(null);
   const [pagination, setPagination] = useState({
     totalTasks: 0,
     currentPage: 1,
     totalPages: 1,
     limit: 10,
   });
+  const latestFetchRef = useRef(0);
 
   const fetchTasks = useCallback(async (params = {}) => {
+    const requestId = latestFetchRef.current + 1;
+    latestFetchRef.current = requestId;
     setLoading(true);
     setError(null);
+    setFetchError(null);
     try {
       const response = await taskAPI.getTasks(params);
+      // A newer request has started; ignore this older response.
+      if (requestId !== latestFetchRef.current) return;
       setTasks(response.data.tasks);
       setPagination(response.data.pagination);
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to fetch tasks');
+      if (requestId !== latestFetchRef.current) return;
+      const message = err.response?.data?.message || 'Could not load tasks. Check your connection and try again.';
+      setError(message);
+      setFetchError(message);
     } finally {
-      setLoading(false);
+      if (requestId === latestFetchRef.current) setLoading(false);
     }
   }, []);
 
@@ -97,6 +108,7 @@ export const useTasks = () => {
     tasks,
     loading,
     error,
+    fetchError,
     pagination,
     fetchTasks,
     createTask,

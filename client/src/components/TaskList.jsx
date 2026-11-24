@@ -14,7 +14,7 @@ import { formatDateOnly } from '../utils/dates.js';
 
 const TaskList = () => {
   const [searchParams, setSearchParams] = useSearchParams();
-  const { tasks, loading, error, pagination, fetchTasks, updateTask, bulkUpdateTasks, deleteTask } = useTasks();
+  const { tasks, loading, fetchError, pagination, fetchTasks, updateTask, bulkUpdateTasks, deleteTask } = useTasks();
   const [projects, setProjects] = useState([]);
   const [projectsError, setProjectsError] = useState('');
   const [filters, setFilters] = useState({
@@ -44,6 +44,7 @@ const TaskList = () => {
   const selectedIdsOnPage = tasks.filter((task) => selectedTaskIds.includes(task._id)).map((task) => task._id);
   const allTasksOnPageSelected = tasks.length > 0 && selectedIdsOnPage.length === tasks.length;
   const hasTaskFilters = Boolean(search || filters.status || filters.priority || projectId);
+  const pageLimit = viewMode === 'board' ? 100 : 50;
 
   useEffect(() => {
     if (selectPageRef.current) {
@@ -70,8 +71,8 @@ const TaskList = () => {
   }, [loadProjects]);
 
   useEffect(() => {
-    fetchTasks({ ...filters, search, projectId, page });
-  }, [fetchTasks, filters, search, projectId, page]);
+    fetchTasks({ ...filters, search, projectId, page, limit: pageLimit });
+  }, [fetchTasks, filters, search, projectId, page, pageLimit]);
 
   const handleFilterChange = (event) => {
     const { name, value } = event.target;
@@ -107,7 +108,7 @@ const TaskList = () => {
     }
   };
 
-  const refreshTasks = () => fetchTasks({ ...filters, search, projectId, page });
+  const refreshTasks = () => fetchTasks({ ...filters, search, projectId, page, limit: pageLimit });
 
   const animateStatusChange = (taskId) => {
     setStatusAnimationTaskId(taskId);
@@ -286,8 +287,8 @@ const TaskList = () => {
         {projectsError && <div className="mt-3"><ErrorState message={projectsError} onRetry={loadProjects} /> <Link to="/projects" className="mt-2 inline-block text-xs font-semibold text-orange-800 underline">Manage projects</Link></div>}
       </section>
 
-      {error && <ErrorState message={error} onRetry={refreshTasks} />}
-      {loading && tasks.length === 0 ? <TasksListSkeleton /> : error && tasks.length === 0 ? null : tasks.length === 0 ? (
+      {fetchError && <ErrorState message={fetchError} onRetry={refreshTasks} />}
+      {loading && tasks.length === 0 ? <TasksListSkeleton /> : fetchError && tasks.length === 0 ? null : tasks.length === 0 ? (
         <EmptyState
           title={hasTaskFilters ? 'No tasks match these filters' : 'No tasks yet'}
           description={hasTaskFilters ? 'Try adjusting the filters or start fresh.' : 'Capture your first task and give your day some direction.'}
